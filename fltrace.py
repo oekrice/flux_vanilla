@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-import pyvista as pv
-pv.start_xvfb()
+#import pyvista as pv
+#pv.start_xvfb()
 
 
 class trace_fieldlines():

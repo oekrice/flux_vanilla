@@ -42,7 +42,7 @@ nx = 128
 ny = 128
 nz = 128
 
-nsnaps = 1000
+nsnaps = 500
 
 remote_flag = 1
 
@@ -80,8 +80,8 @@ i = 0
 if len(sys.argv) > 2:
     i = int(sys.argv[2])
 
-#for plot_num in range(0,nsnaps,1):
-for plot_num in range(40,41):
+for plot_num in range(0,nsnaps,1):
+#for plot_num in range(40,41):
 
     if remote_flag:
         data_directory = './Data/'
@@ -94,9 +94,9 @@ for plot_num in range(40,41):
     fname = '%s%04d.nc' % (data_directory, i)
     print('Making plot', i, 'fname', fname)
 
-    #fname_next = '%s%04d.nc' % (data_directory, i + 1)
-    #while not os.path.exists(fname_next):
-    #    time.sleep(0.1)
+    fname_next = '%s%04d.nc' % (data_directory, i + 1)
+    while not os.path.exists(fname_next):
+        time.sleep(0.1)
     try:
         data = netcdf_file(fname, 'r', mmap=False)
         print('File', fname, 'found')
