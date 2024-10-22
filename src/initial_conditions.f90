@@ -142,13 +142,7 @@ CONTAINS
   DO ix = -1, nx+1
      DO iy = -1, ny+1
         DO iz = -1, nz+1
-          if (zb(iz) < trans) then
-          bx(ix, iy, iz) = bx(ix, iy, iz)
-          else if (zb(iz) < cor) then
-          bx(ix, iy, iz) = bx(ix, iy, iz) + backfield_strength*(zb(iz) - trans)/(cor - trans)
-          else
           bx(ix, iy,iz) = bx(ix,iy,iz) + backfield_strength
-          end if
         END DO
      END DO
   END DO
