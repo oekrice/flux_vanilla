@@ -193,11 +193,14 @@ CONTAINS
        vy(:,:,nz  ) = 0.0_num
        vy(:,:,nz+1) = 0.0_num
        vy(:,:,nz+2) = 0.0_num
+       vz(:,:,nz  ) = 0.0_num
+
        do i = -2, nx+2
           do j = -2, ny+2
           vz(i, j, nz) = max(0.0,1.25*vz(i,j,nz-1))
           end do
        end do
+       vz(:,:,nz  ) = 0.0_num
        vz(:,:,nz+1) = vz(:,:,nz)
        vz(:,:,nz+2) = vz(:,:,nz+1)
 
@@ -281,6 +284,7 @@ CONTAINS
           vz1(i, j, nz) = max(0.0,1.25*vz1(i,j,nz-1))
           end do
        end do
+       vz1(:,:,nz  ) = 0.0_num
        vz1(:,:,nz+1) = vz1(:,:,nz)
        vz1(:,:,nz+2) = vz1(:,:,nz+1)
     END IF

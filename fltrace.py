@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-#import pyvista as pv
+import pyvista as pv
 pv.start_xvfb()
 
 

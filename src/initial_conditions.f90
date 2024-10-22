@@ -137,7 +137,6 @@ CONTAINS
   !Add background magnetic field.
   !Zero at the top of the photosphere, rising linearly to backfield_strength above
 
-
   backfield_strength = 0.005_num
   DO ix = -1, nx+1
      DO iy = -1, ny+1

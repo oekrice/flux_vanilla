@@ -1,9 +1,9 @@
 
 begin:control
 	#global number of gridpoints
-	nx=400 #in x
-	ny=400 #in y
-	nz=400 #in z
+	nx=128 #in x
+	ny=128 #in y
+	nz=128 #in z
 
 	#maximum number of iterations
 	#set to -1 to run until finished
@@ -14,7 +14,7 @@ begin:control
 	dt_snapshots=5.0
 
 	#final time of simulation
-        t_end=300
+        t_end=1000
 
 	#Shock viscosities (linear + quadratic)
 	visc1=0.1

@@ -52,8 +52,8 @@ PROGRAM lare3d
   ENDIF
   walltime_start=MPI_WTIME()
 
-  ndiags = 1000
-  nsnaps = 1000
+  ndiags = 500
+  nsnaps = 500
   diag_num = 0
   snap_num = 0
   DO
