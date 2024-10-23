@@ -14,7 +14,7 @@ begin:control
 	dt_snapshots=5.0
 
 	#final time of simulation
-        t_end=1000
+        t_end = 250
 
 	#Shock viscosities (linear + quadratic)
 	visc1=0.1
