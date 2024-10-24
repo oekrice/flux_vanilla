@@ -76,7 +76,7 @@ class Grid():
 
 #for plot_num in range(0,nsnaps,1):
 aheights = []; rheights = []; ts = []
-for plot_num in range(300,301):
+for plot_num in range(0,501):
 
     if remote_flag:
         data_directory = './Data_150/'
@@ -156,6 +156,7 @@ for plot_num in range(300,301):
         rope_index = -1
         arcade = False
         rope = False
+        rope_height = np.nan
         signs = np.sign(checkslice)
         flips = np.where(signs[1:]*signs[:-1] == -1)[0]   #where the magnetic field changes sign
         for flip in flips:
@@ -175,6 +176,9 @@ for plot_num in range(300,301):
     arcade, aheight, rope, rheight = categorise(checkslice)
 
     aheights.append(aheight); rheights.append(rheight)
+
+    print('arcade heights', aheights)
+    print('rope heights', rheights)
 
     if False:
         trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = True, plot_notvista = False)
