@@ -157,6 +157,7 @@ for plot_num in range(0,501,10):
         arcade = False
         rope = False
         rope_height = np.nan
+        arcade_height = np.nan
         signs = np.sign(checkslice)
         flips = np.where(signs[1:]*signs[:-1] == -1)[0]   #where the magnetic field changes sign
         for flip in flips:
@@ -170,8 +171,6 @@ for plot_num in range(0,501,10):
             if signs[flip] < 0.0 and np.min(checkslice[:flip] < -by_reference_flux*0.25):
                 arcade = True
                 arcade_height = zc[z_photo:][flip]
-        else:
-            arcade_height = np.nan
         return arcade, arcade_height, rope, rope_height
 
     arcade, aheight, rope, rheight = categorise(checkslice)
