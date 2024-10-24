@@ -176,7 +176,7 @@ for plot_num in range(0,501,10):
 
     arcade, aheight, rope, rheight = categorise(checkslice)
 
-    aheights.append(aheight); rheights.append(rheight)
+    aheights.append(aheight); rheights.append(rheight); ts.append(plot_num/2)
 
     print('arcade heights', aheights)
     print('rope heights', rheights)
@@ -190,7 +190,8 @@ np.savetxt('./analysis/rheights.txt', rheights, delimiter = ',')
 aheights = np.loadtxt('./analysis/aheights.txt')
 rheights = np.loadtxt('./analysis/rheights.txt')
 
-plt.plot(aheights)
-plt.plot(rheights)
+plt.plot(ts, aheights,label = 'arcade height')
+plt.plot(ts, rheights,label = 'rope height')
+plt.legend()
 plt.savefig('./analysis/heights.png')
 plt.close()
