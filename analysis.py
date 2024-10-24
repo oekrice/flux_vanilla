@@ -76,7 +76,7 @@ class Grid():
 
 cs = ['blue', 'red', 'green']
 #for plot_num in range(0,nsnaps,1):
-for di, data_source in enumerate(['./Data_150', 'Data']):
+for di, data_source in enumerate(['./Data_150/', './Data/']):
     aheights = []; rheights = []; ts = []
     for plot_num in range(0,501,10):
 
