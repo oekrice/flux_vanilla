@@ -76,7 +76,7 @@ class Grid():
 
 #for plot_num in range(0,nsnaps,1):
 aheights = []; rheights = []; ts = []
-for plot_num in range(0,501,10):
+for plot_num in range(0,501,1):
 
     if remote_flag:
         data_directory = './Data_150/'
@@ -190,8 +190,8 @@ np.savetxt('./analysis/rheights.txt', rheights, delimiter = ',')
 aheights = np.loadtxt('./analysis/aheights.txt')
 rheights = np.loadtxt('./analysis/rheights.txt')
 
-plt.plot(ts, aheights,label = 'arcade height', linestyle = 'solid')
-plt.plot(ts, rheights,label = 'rope height', linestyle = 'dashed')
+plt.plot(ts, aheights,label = 'arcade height', linestyle = 'dashed')
+plt.plot(ts, rheights,label = 'rope height', linestyle = 'solid')
 plt.legend()
 plt.savefig('./analysis/heights.png')
 plt.close()
