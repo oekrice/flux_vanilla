@@ -74,124 +74,126 @@ class Grid():
         self.z0 = zs[0]; self.z1 = zs[-1]
         self.nx = nx ; self.ny = ny; self.nz = nz
 
+cs = ['blue', 'red', 'green']
 #for plot_num in range(0,nsnaps,1):
-aheights = []; rheights = []; ts = []
-for plot_num in range(0,501,1):
+for di, data_source in enumerate(['./Data_150', 'Data']):
+    aheights = []; rheights = []; ts = []
+    for plot_num in range(0,501,10):
 
-    if remote_flag:
-        data_directory = './Data_150/'
-    else:
-        data_directory = '/home/grads/trcn27/rdata/lare3d_jet/'
+        if remote_flag:
+            data_directory = data_source
+        else:
+            data_directory = '/home/grads/trcn27/rdata/lare3d_jet/'
 
-    slice_index = ny//2
-    i = plot_num
-    wait = 0
-    fname = '%s%04d.nc' % (data_directory, i)
-    print('Making plot', i, 'fname', fname)
+        slice_index = ny//2
+        i = plot_num
+        wait = 0
+        fname = '%s%04d.nc' % (data_directory, i)
+        print('Making plot', i, 'fname', fname)
 
-    #fname_next = '%s%04d.nc' % (data_directory, i + 1)
-    #while not os.path.exists(fname_next):
-    #    time.sleep(0.1)
-    try:
-        data = netcdf_file(fname, 'r', mmap=False)
-        print('File', fname, 'found')
+        #fname_next = '%s%04d.nc' % (data_directory, i + 1)
+        #while not os.path.exists(fname_next):
+        #    time.sleep(0.1)
+        try:
+            data = netcdf_file(fname, 'r', mmap=False)
+            print('File', fname, 'found')
 
-    except:
-        print('File', fname, 'not found')
-        continue
+        except:
+            print('File', fname, 'not found')
+            continue
 
-    bx = np.zeros((nx+1,ny+2,nz+2))
-    by = np.zeros((nx+2,ny+1,nz+2))
-    bz = np.zeros((nx+2,ny+2,nz+1))
+        bx = np.zeros((nx+1,ny+2,nz+2))
+        by = np.zeros((nx+2,ny+1,nz+2))
+        bz = np.zeros((nx+2,ny+2,nz+1))
 
-    bx[:,1:-1,1:-1] = np.swapaxes(data.variables['bx'][:],0,2)
-    by[1:-1,:,1:-1] = np.swapaxes(data.variables['by'][:],0,2)
-    bz[1:-1,1:-1,:] = np.swapaxes(data.variables['bz'][:],0,2)
+        bx[:,1:-1,1:-1] = np.swapaxes(data.variables['bx'][:],0,2)
+        by[1:-1,:,1:-1] = np.swapaxes(data.variables['by'][:],0,2)
+        bz[1:-1,1:-1,:] = np.swapaxes(data.variables['bz'][:],0,2)
 
-    en = np.zeros((nx+2,ny+2,nz+2))
-    rho = np.zeros((nx+2,ny+2,nz+2))
+        en = np.zeros((nx+2,ny+2,nz+2))
+        rho = np.zeros((nx+2,ny+2,nz+2))
 
-    en[1:-1,1:-1,1:-1] = np.swapaxes(data.variables['en'][:],0,2)
-    rho[1:-1,1:-1,1:-1] = np.swapaxes(data.variables['rho'][:],0,2)
+        en[1:-1,1:-1,1:-1] = np.swapaxes(data.variables['en'][:],0,2)
+        rho[1:-1,1:-1,1:-1] = np.swapaxes(data.variables['rho'][:],0,2)
 
-    vx = np.zeros((nx+1,ny+1,nz+1))
-    vy = np.zeros((nx+1,ny+1,nz+1))
-    vz = np.zeros((nx+1,ny+1,nz+1))
+        vx = np.zeros((nx+1,ny+1,nz+1))
+        vy = np.zeros((nx+1,ny+1,nz+1))
+        vz = np.zeros((nx+1,ny+1,nz+1))
 
-    vx = np.swapaxes(data.variables['vx'][:],0,2)
-    vy = np.swapaxes(data.variables['vy'][:],0,2)
-    vz = np.swapaxes(data.variables['vz'][:],0,2)
+        vx = np.swapaxes(data.variables['vx'][:],0,2)
+        vy = np.swapaxes(data.variables['vy'][:],0,2)
+        vz = np.swapaxes(data.variables['vz'][:],0,2)
 
-    pr = rho*en*(2/3)
+        pr = rho*en*(2/3)
 
-    data.close()
+        data.close()
 
 
-    def magfield(bx, by, bz):
-        bx1 = 0.5*(bx[1:,slice_index,1:-1] + bx[:-1,slice_index,1:-1])
-        by1 = 0.5*(by[1:-1,slice_index,1:-1] + by[1:-1,slice_index,1:-1])
-        bz1 = 0.5*(bz[1:-1,slice_index,1:] + bz[1:-1,slice_index,:-1])
-        return 0.5*(bx1**2 + by1**2+ bz1**2)
+        def magfield(bx, by, bz):
+            bx1 = 0.5*(bx[1:,slice_index,1:-1] + bx[:-1,slice_index,1:-1])
+            by1 = 0.5*(by[1:-1,slice_index,1:-1] + by[1:-1,slice_index,1:-1])
+            bz1 = 0.5*(bz[1:-1,slice_index,1:] + bz[1:-1,slice_index,:-1])
+            return 0.5*(bx1**2 + by1**2+ bz1**2)
 
-    if np.max(magfield(bx,by,bz)) > 1e-6:
-        beta = 4*np.pi*pr[1:-1,slice_index,1:-1].T/magfield(bx,by,bz).T
-    else:
-        beta = 0.0*pr[1:-1,slice_index,1:-1].T
+        if np.max(magfield(bx,by,bz)) > 1e-6:
+            beta = 4*np.pi*pr[1:-1,slice_index,1:-1].T/magfield(bx,by,bz).T
+        else:
+            beta = 0.0*pr[1:-1,slice_index,1:-1].T
 
-    #Check if the flux has emerged at all
-    if np.max(np.abs(bx[1:,slice_index,z_photo:-1])) > 0.01:
-        has_emerged = True
-    else:
-        has_emerged = False
+        #Check if the flux has emerged at all
+        if np.max(np.abs(bx[1:,slice_index,z_photo:-1])) > 0.01:
+            has_emerged = True
+        else:
+            has_emerged = False
 
-    by_reference_flux = np.max(np.abs(by[ny//2,slice_index,z_photo:-1]))
-    bx_interior = bx[:,1:-1,1:-1]
-    #Is it an arcade or not? Check by taking a 1D slice through the x component, with some smooothing to remove noise early on
-    checkslice = gaussian_filter1d(bx_interior[nx//2,slice_index,z_photo:], 2)
+        by_reference_flux = np.max(np.abs(by[ny//2,slice_index,z_photo:-1]))
+        bx_interior = bx[:,1:-1,1:-1]
+        #Is it an arcade or not? Check by taking a 1D slice through the x component, with some smooothing to remove noise early on
+        checkslice = gaussian_filter1d(bx_interior[nx//2,slice_index,z_photo:], 2)
 
-    def categorise(checkslice):
-        #Determine the topology based on this slice
-        #Initially will be negative followed by positive
-        #Check for rope
-        rope_index = -1
-        arcade = False
-        rope = False
-        rope_height = np.nan
-        arcade_height = np.nan
-        signs = np.sign(checkslice)
-        flips = np.where(signs[1:]*signs[:-1] == -1)[0]   #where the magnetic field changes sign
-        for flip in flips:
-            if signs[flip] > 0.0 and np.max(checkslice[:flip] > by_reference_flux*0.25):   #positive to negative
-                rope_height = zc[z_photo:][flip]
-                rope = True
-            else:
-                rope_height = np.nan
-        #Check for arcade (before the rope forms and erupts)
-        for flip in flips:
-            if signs[flip] < 0.0 and np.min(checkslice[:flip]) < -by_reference_flux*0.25:
-                arcade = True
-                arcade_height = zc[z_photo:][flip]
+        def categorise(checkslice):
+            #Determine the topology based on this slice
+            #Initially will be negative followed by positive
+            #Check for rope
+            rope_index = -1
+            arcade = False
+            rope = False
+            rope_height = np.nan
+            arcade_height = np.nan
+            signs = np.sign(checkslice)
+            flips = np.where(signs[1:]*signs[:-1] == -1)[0]   #where the magnetic field changes sign
+            for flip in flips:
+                if signs[flip] > 0.0 and np.max(checkslice[:flip] > by_reference_flux*0.25):   #positive to negative
+                    rope_height = zc[z_photo:][flip]
+                    rope = True
+                else:
+                    rope_height = np.nan
+            #Check for arcade (before the rope forms and erupts)
+            for flip in flips:
+                if signs[flip] < 0.0 and np.min(checkslice[:flip]) < -by_reference_flux*0.25:
+                    arcade = True
+                    arcade_height = zc[z_photo:][flip]
 
-        return arcade, arcade_height, rope, rope_height
+            return arcade, arcade_height, rope, rope_height
 
-    arcade, aheight, rope, rheight = categorise(checkslice)
+        arcade, aheight, rope, rheight = categorise(checkslice)
 
-    aheights.append(aheight); rheights.append(rheight); ts.append(plot_num/2)
+        aheights.append(aheight); rheights.append(rheight); ts.append(plot_num/2)
 
-    print('arcade heights', aheights)
-    print('rope heights', rheights)
+        print('arcade heights', aheights)
+        print('rope heights', rheights)
 
-    if False:
-        trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = True, plot_notvista = False)
+        if False:
+            trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = True, plot_notvista = False)
 
-np.savetxt('./analysis/aheights.txt', aheights, delimiter = ',')
-np.savetxt('./analysis/rheights.txt', rheights, delimiter = ',')
+    np.savetxt('./analysis/aheights%d.txt' % di, aheights, delimiter = ',' )
+    np.savetxt('./analysis/rheights%d.txt' % di, rheights, delimiter = ',')
 
-aheights = np.loadtxt('./analysis/aheights.txt')
-rheights = np.loadtxt('./analysis/rheights.txt')
+    aheights = np.loadtxt('./analysis/aheights%d.txt' % di)
+    rheights = np.loadtxt('./analysis/rheights%d.txt' % di)
 
-plt.plot(ts, aheights,label = 'arcade height', linestyle = 'dashed')
-plt.plot(ts, rheights,label = 'rope height', linestyle = 'solid')
+    plt.plot(ts, aheights,label = 'arcade height', linestyle = 'dashed', c = cs[di])
+    plt.plot(ts, rheights,label = 'rope height', linestyle = 'solid', c = cs[di])
 plt.legend()
 plt.savefig('./analysis/heights.png')
 plt.close()
