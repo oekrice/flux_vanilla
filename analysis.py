@@ -76,7 +76,7 @@ class Grid():
 
 #for plot_num in range(0,nsnaps,1):
 aheights = []; rheights = []; ts = []
-for plot_num in range(0,501):
+for plot_num in range(0,501,10):
 
     if remote_flag:
         data_directory = './Data_150/'
@@ -166,9 +166,10 @@ for plot_num in range(0,501):
             else:
                 rope_height = np.nan
         #Check for arcade (before the rope forms and erupts)
-        if len(flips) == 1 and signs[flips[0]] < 0.0 and np.min(checkslice[:flips[0]] < -by_reference_flux*0.25):
-            arcade = True
-            arcade_height = zc[z_photo:][flips[0]]
+        for flip in flips:
+            if signs[flips] < 0.0 and np.min(checkslice[:flips[0]] < -by_reference_flux*0.25):
+                arcade = True
+                arcade_height = zc[z_photo:][flips[0]]
         else:
             arcade_height = np.nan
         return arcade, arcade_height, rope, rope_height
