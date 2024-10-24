@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-#import pyvista as pv
-#pv.start_xvfb()
+import pyvista as pv
+pv.start_xvfb()
 
 
 class trace_fieldlines():
@@ -155,7 +155,7 @@ class trace_fieldlines():
                     yp = int((self.ny)*(yjs[j] - self.y0)/(self.y1 - self.y0))
                     zp = int((self.nz)*(zks[k] - self.z0)/(self.z1 - self.z0))
 
-                    if np.abs(by[xp,yp,zp]) > 0.015:
+                    if np.abs(by[xp,yp,zp]) > 0.01:
                         self.starts.append([xis[i],yjs[j],zks[k]])
             print('Tracing', len(self.starts), 'lines')
 
@@ -221,7 +221,10 @@ class trace_fieldlines():
                 p.add_mesh(pv.Spline(line, len(line)),color='white',line_width=1)
 
 
-            #p.camera.position = (0,2.0,1.0)
+            #p.camera.position = (0,0.0,1.0)
+            print(p.camera.position)
+            p.camera.position = (420.0,0.0,300.0)
+
             p.camera.focal_point = (0,0,0.25)
 
             p.show(screenshot='plots/b%04d.png' % save, window_size = (1000,1000))
