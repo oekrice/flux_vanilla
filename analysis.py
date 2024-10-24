@@ -168,9 +168,10 @@ for plot_num in range(0,501,10):
                 rope_height = np.nan
         #Check for arcade (before the rope forms and erupts)
         for flip in flips:
-            if signs[flip] < 0.0 and np.min(checkslice[:flip] < -by_reference_flux*0.25):
+            if signs[flip] < 0.0 and np.min(checkslice[:flip]) < -by_reference_flux*0.25:
                 arcade = True
                 arcade_height = zc[z_photo:][flip]
+
         return arcade, arcade_height, rope, rope_height
 
     arcade, aheight, rope, rheight = categorise(checkslice)
