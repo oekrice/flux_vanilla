@@ -77,8 +77,9 @@ class Grid():
 cs = ['blue', 'red', 'green']
 data_sources = ['./Data_150/', './Data_15/', './Data/']
 #for plot_num in range(0,nsnaps,1):
+aheights = []; rheights = []; ts = []
+
 for di, data_source in enumerate(['./Data_150/', './Data_15/', './Data/']):
-    aheights = []; rheights = []; ts = []
     for plot_num in range(0,501,50):
 
         if remote_flag:
