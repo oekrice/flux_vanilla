@@ -75,10 +75,11 @@ class Grid():
         self.nx = nx ; self.ny = ny; self.nz = nz
 
 cs = ['blue', 'red', 'green']
+data_sources = ['./Data_150/', './Data_15/', './Data/']
 #for plot_num in range(0,nsnaps,1):
-for di, data_source in enumerate(['./Data_150/', './Data/']):
+for di, data_source in enumerate(['./Data_150/', './Data_15/', './Data/']):
     aheights = []; rheights = []; ts = []
-    for plot_num in range(0,501,10):
+    for plot_num in range(0,501,50):
 
         if remote_flag:
             data_directory = data_source
@@ -176,7 +177,11 @@ for di, data_source in enumerate(['./Data_150/', './Data/']):
 
             return arcade, arcade_height, rope, rope_height
 
-        arcade, aheight, rope, rheight = categorise(checkslice)
+        try:
+            arcade, aheight, rope, rheight = categorise(checkslice)
+        except:
+            arcade, aheight, rope, rheight = False, np.nan, False, np.nan
+
 
         aheights.append(aheight); rheights.append(rheight); ts.append(plot_num/2)
 
@@ -188,12 +193,17 @@ for di, data_source in enumerate(['./Data_150/', './Data/']):
 
     np.savetxt('./analysis/aheights%d.txt' % di, aheights, delimiter = ',' )
     np.savetxt('./analysis/rheights%d.txt' % di, rheights, delimiter = ',')
+    np.savetxt('./analysis/ts%d.txt' % di, rheights, delimiter = ',')
 
+for di in range(3):
     aheights = np.loadtxt('./analysis/aheights%d.txt' % di)
     rheights = np.loadtxt('./analysis/rheights%d.txt' % di)
+    ts = np.loadtxt('./analysis/ts%d.txt' % di)
 
-    plt.plot(ts, aheights,label = 'arcade height', linestyle = 'dashed', c = cs[di])
-    plt.plot(ts, rheights,label = 'rope height', linestyle = 'solid', c = cs[di])
+    plt.plot(ts, aheights, linestyle = 'dashed', c = cs[di])
+    plt.plot(ts, rheights,label = data_sources[di], linestyle = 'solid', c = cs[di])
+
 plt.legend()
 plt.savefig('./analysis/heights.png')
+plt.show()
 plt.close()
