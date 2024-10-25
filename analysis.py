@@ -195,7 +195,7 @@ for di, data_source in enumerate(['./Data_150/', './Data_15/', './Data/']):
 
     np.savetxt('./analysis/aheights%d.txt' % di, aheights, delimiter = ',' )
     np.savetxt('./analysis/rheights%d.txt' % di, rheights, delimiter = ',')
-    np.savetxt('./analysis/ts%d.txt' % di, rheights, delimiter = ',')
+    np.savetxt('./analysis/ts%d.txt' % di, ts, delimiter = ',')
 
 for di in range(3):
     aheights = np.loadtxt('./analysis/aheights%d.txt' % di)
