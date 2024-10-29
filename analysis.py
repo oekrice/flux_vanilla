@@ -74,14 +74,14 @@ class Grid():
         self.z0 = zs[0]; self.z1 = zs[-1]
         self.nx = nx ; self.ny = ny; self.nz = nz
 
-cs = ['blue', 'red', 'green']
-data_sources = ['./Data_150/', './Data_15/', './Data/']
+cs = ['blue', 'red', 'green', 'orange']
+data_sources = ['./Data_450/','./Data_150/', './Data_50/','./Data_15/']
 #for plot_num in range(0,nsnaps,1):
 
-for di, data_source in enumerate(['./Data_150/', './Data_15/', './Data/']):
+for di, data_source in enumerate(data_sources):
     aheights = []; rheights = []; ts = []
 
-    for plot_num in range(0,501,50):
+    for plot_num in range(0,501,1):
 
         if remote_flag:
             data_directory = data_source
@@ -197,7 +197,7 @@ for di, data_source in enumerate(['./Data_150/', './Data_15/', './Data/']):
     np.savetxt('./analysis/rheights%d.txt' % di, rheights, delimiter = ',')
     np.savetxt('./analysis/ts%d.txt' % di, ts, delimiter = ',')
 
-for di in range(3):
+for di in range(4):
     aheights = np.loadtxt('./analysis/aheights%d.txt' % di)
     rheights = np.loadtxt('./analysis/rheights%d.txt' % di)
     ts = np.loadtxt('./analysis/ts%d.txt' % di)
@@ -205,6 +205,8 @@ for di in range(3):
     plt.plot(ts, aheights, linestyle = 'dashed', c = cs[di])
     plt.plot(ts, rheights,label = data_sources[di], linestyle = 'solid', c = cs[di])
 
+plt.ylabel('height')
+plt.xlabel('time')
 plt.legend()
 plt.savefig('./analysis/heights.png')
 plt.show()

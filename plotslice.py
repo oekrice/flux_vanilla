@@ -81,8 +81,8 @@ i = 0
 if len(sys.argv) > 2:
     i = int(sys.argv[2])
 
-#for plot_num in range(0,nsnaps,1):
-for plot_num in range(300,301):
+for plot_num in range(0,nsnaps,1):
+#for plot_num in range(300,301):
 
     if remote_flag:
         data_directory = './Data/'
@@ -95,9 +95,9 @@ for plot_num in range(300,301):
     fname = '%s%04d.nc' % (data_directory, i)
     print('Making plot', i, 'fname', fname)
 
-    #fname_next = '%s%04d.nc' % (data_directory, i + 1)
-    #while not os.path.exists(fname_next):
-    #    time.sleep(0.1)
+    fname_next = '%s%04d.nc' % (data_directory, i + 1)
+    while not os.path.exists(fname_next):
+        time.sleep(0.1)
     try:
         data = netcdf_file(fname, 'r', mmap=False)
         print('File', fname, 'found')
@@ -146,7 +146,7 @@ for plot_num in range(300,301):
         beta = 0.0*pr[1:-1,slice_index,1:-1].T
 
     if True:
-        trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = True, plot_notvista = False)
+        trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = False, plot_notvista = True)
 
     if True:
         fig, axs = plt.subplots(3,4, figsize = (10,6))
