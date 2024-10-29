@@ -213,7 +213,7 @@ class trace_fieldlines():
             x, y = np.meshgrid(self.xs, self.ys)
             z = 10.0*np.ones((len(self.xs),len(self.ys)))
             surface = pv.StructuredGrid(x, y, z)
-            p = pv.Plotter(off_screen=False)
+            p = pv.Plotter(off_screen=True)
             p.background_color = "black"
             p.add_mesh(surface, scalars= bz[1:-1,1:-1,z_photo], show_edges=False,cmap = 'plasma')
             for line in self.lines:
