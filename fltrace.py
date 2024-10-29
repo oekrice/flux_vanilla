@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import os
 
-#import pyvista as pv
+import pyvista as pv
 #pv.start_xvfb()
 
 
@@ -213,7 +213,7 @@ class trace_fieldlines():
             x, y = np.meshgrid(self.xs, self.ys)
             z = 10.0*np.ones((len(self.xs),len(self.ys)))
             surface = pv.StructuredGrid(x, y, z)
-            p = pv.Plotter(off_screen=True)
+            p = pv.Plotter(off_screen=False)
             p.background_color = "black"
             p.add_mesh(surface, scalars= bz[1:-1,1:-1,z_photo], show_edges=False,cmap = 'plasma')
             for line in self.lines:
@@ -223,11 +223,12 @@ class trace_fieldlines():
 
             #p.camera.position = (0,0.0,1.0)
             print(p.camera.position)
-            p.camera.position = (420.0,0.0,300.0)
+            p.camera.position = (400.0,200,250.0)
 
-            p.camera.focal_point = (0,0,0.25)
+            p.camera.focal_point = (0,0,0)
 
             p.show(screenshot='plots/b%04d.png' % save, window_size = (1000,1000))
+
 
     def interpolate_field(self,pt):
         #Outputs the magnetic field vector at point pt, using the individual magnetic field vectors (no unecessary averaging)
