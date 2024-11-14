@@ -19,7 +19,7 @@ import time
 from scipy.io import netcdf_file
 import matplotlib.pyplot as plt
 import pyvista as pv
-pv.start_xvfb()
+#pv.start_xvfb()
 
 class trace_fieldlines():
     def __init__(self, snap_min, snap_max):

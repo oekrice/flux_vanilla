@@ -82,7 +82,7 @@ if len(sys.argv) > 2:
     i = int(sys.argv[2])
 
 #for plot_num in range(0,nsnaps,1):
-for plot_num in range(200,401):
+for plot_num in range(100,401):
 
     data_directory = './Data_150/'
 

@@ -11,7 +11,7 @@ begin:control
 
 
 	#number of timesteps between output dumps
-	dt_snapshots=5.0
+	dt_snapshots= 5.0
 
 	#final time of simulation
         t_end = 250

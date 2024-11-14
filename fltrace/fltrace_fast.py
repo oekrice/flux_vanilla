@@ -19,13 +19,13 @@ import time
 from scipy.io import netcdf_file
 import matplotlib.pyplot as plt
 import pyvista as pv
-pv.start_xvfb()
+#pv.start_xvfb()
 
 class trace_fieldlines():
-    def __init__(self):
+    def __init__(self, snap_number):
         #Establish grid parameters (can be read in from elsewhere of course)
         self.run = 0
-        self.snap = 300
+        self.snap = snap_number
         self.print_flag = 1
         self.save_number = self.snap
         self.data_root = '../Data_150/'
@@ -251,4 +251,5 @@ class trace_fieldlines():
 
         self.lines = np.swapaxes(data.variables['lines'][:],0,2)
 
-trace_fieldlines()
+for i in range(500):
+	trace_fieldlines(i)
