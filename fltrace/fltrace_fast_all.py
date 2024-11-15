@@ -33,7 +33,7 @@ class trace_fieldlines():
             self.print_flag = 1
 
             self.save_number = self.snap
-            self.data_root = '../Data_150/'
+            self.data_root = '../Data_50/'
             self.option = 3   #tracing a plotting options (1 for jet, 2 for emergence)
 
             #Establish start points for the field line plotting
@@ -257,4 +257,4 @@ class trace_fieldlines():
 
         self.lines = np.swapaxes(data.variables['lines'][:],0,2)
 
-trace_fieldlines(snap_min = 0, snap_max = 500)
+trace_fieldlines(snap_min = 300, snap_max = 301)
