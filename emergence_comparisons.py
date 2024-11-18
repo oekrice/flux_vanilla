@@ -300,7 +300,7 @@ if True:
         axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
 
     plt.tight_layout()
-    plt.show()
+    #plt.show()
     plt.savefig('./quantity_plots/%d.png' % snap_id)
     plt.close()
 
