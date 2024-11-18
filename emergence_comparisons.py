@@ -222,8 +222,8 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
         lz = grid_spacing[2]*ncells
 
         #set number of points used to calculate the distribution from
-        nx = 100
-        ny = 100
+        nx = 200
+        ny = 200
 
         # set a minimum strength of field line cut off
         bCut = 0.01
@@ -271,31 +271,45 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
 if True:
     fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(10, 10))
 
+    vmin = 1e6; vmax =  -1e6
     for strat_flag in range(nstrats):
-        im = axes[0,strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic')
+        vmin = min(vmin, np.percentile(flhs[strat_flag], 1))
+        vmax = max(vmin, np.percentile(flhs[strat_flag], 99))
+    for strat_flag in range(nstrats):
+        im = axes[0,strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[0,strat_flag])
         axes[0,strat_flag].set_title('FLH' + paths[strat_flag])
 
     # In[45]:
+    vmin = 1e6; vmax =  -1e6
+    for strat_flag in range(nstrats):
+        vmin = min(vmin, np.percentile(flws[strat_flag], 1))
+        vmax = max(vmin, np.percentile(flws[strat_flag], 99))
 
     for strat_flag in range(nstrats):
-        im = axes[1,strat_flag].imshow(flws[strat_flag].T,origin='lower',cmap='seismic')
+        im = axes[1,strat_flag].imshow(flws[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[1,strat_flag])
         axes[1,strat_flag].set_title('FLE' + paths[strat_flag])
 
     # In[46]:
 
-
+    vmin = 1e6; vmax =  -1e6
     for strat_flag in range(nstrats):
-        im = axes[2,strat_flag].imshow(flhBzs[strat_flag].T,origin='lower',cmap='seismic')
+        vmin = min(vmin, np.percentile(flhBzs[strat_flag], 1))
+        vmax = max(vmin, np.percentile(flhBzs[strat_flag], 99))
+    for strat_flag in range(nstrats):
+        im = axes[2,strat_flag].imshow(flhBzs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[2,strat_flag])
         axes[2,strat_flag].set_title('WFLH' + paths[strat_flag])
 
     # In[ ]:
 
-
+    vmin = 1e6; vmax =  -1e6
     for strat_flag in range(nstrats):
-        im = axes[3,strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic')
+        vmin = min(vmin, np.percentile(twistFs[strat_flag], 1))
+        vmax = max(vmin, np.percentile(twistFs[strat_flag], 99))
+    for strat_flag in range(nstrats):
+        im = axes[3,strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[3,strat_flag])
         axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
 
