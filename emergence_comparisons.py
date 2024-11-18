@@ -16,11 +16,13 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.io import netcdf_file
 import os
+import sys
 # Code to compare field line quanitites (twist, helicity) etc. between the stratified and unstratified jet simulations
 
-snap_id = 300   #number of the snap to compare
-
-copy = True #copy over from archie-west
+if len(sys.argv) > 1:
+    snap_id = int(sys.argv[1])
+else:
+    snap_id = 300
 
 flhs = []; flws = []; flhBzs = []; twistFs = []
 
@@ -39,7 +41,7 @@ if False:
 paths = ['./Data_15/', './Data_50/', './Data_150/']
 titles = ['Strat ratio 15', 'Strat ratio 50', 'Strat ratio 150']
 
-nstrats = 1
+nstrats = 3
 
 for strat_flag in range(nstrats):   #do unstratified (top) and stratified (bottom)
     print('Dealing with field number', strat_flag)
@@ -49,9 +51,9 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
 
     # In[67]:
 
-    bxOg = np.swapaxes(file2read.variables['bx'][:], 0, 2)
-    byOg = np.swapaxes(file2read.variables['by'][:], 0, 2)
-    bzOg = np.swapaxes(file2read.variables['bz'][:], 0, 2)
+    bxOg = np.swapaxes(file2read.variables['bx'][:], 0, 2).copy()
+    byOg = np.swapaxes(file2read.variables['by'][:], 0, 2).copy()
+    bzOg = np.swapaxes(file2read.variables['bz'][:], 0, 2).copy()
 
     file2read.close()
     # In[69]:
@@ -122,12 +124,12 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     AConst = flt.AConst(bzConst,points,dA,[ncells, ncells, ncells])
     AField = AField + AConst
 
+    '''
     fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(10, 7))
     for i in range(3):
         im = axes[0,i].pcolormesh(bField[:,:,z_photo, i].T)
         fig.colorbar(im, ax=axes[0,i])
         axes[0,i].set_title('Original BField')
-        print(i, np.max(bField[:,:,z_photo, i].T))
         im = axes[1,i].pcolormesh(bField_test[:,:,z_photo, i].T)
         fig.colorbar(im, ax=axes[1,i])
         axes[1,i].set_title('Curl of A')
@@ -135,17 +137,7 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     plt.tight_layout()
     plt.show()
 
-    fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(10, 7))
-
-    for i in range(3):
-        comp = np.abs(bField[ncells//4:3*ncells//4,ncells//4:3*ncells//4,z_photo, i].T/bField_test[ncells//4:3*ncells//4,ncells//4:3*ncells//4,z_photo, i].T)
-        print(i, np.percentile(comp,50))
-        im = axes[1,i].pcolormesh(comp, vmax = 2.0, vmin = 0.0)
-        fig.colorbar(im, ax=axes[1,i])
-
-        axes[1,i].set_title('Comparison')
-    plt.show()
-
+    '''
     # In[72]:
 
     # calculate the field line helcity and winding densities
@@ -276,58 +268,41 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
         twistFs.append(twistF)
 
 # In[44]:
-if False:
+if True:
+    fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(10, 10))
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
     for strat_flag in range(nstrats):
-        im = axes[strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic')
-        axes[strat_flag].set_title(titles[strat_flag])
-        fig.colorbar(im, ax=axes[strat_flag])
-    plt.suptitle('Field-line helicities')
-    plt.tight_layout()
-    plt.savefig('extra_plots/flh.png')
-    plt.close()
+        im = axes[0,strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic')
+        fig.colorbar(im, ax=axes[0,strat_flag])
+        axes[0,strat_flag].set_title('FLH' + paths[strat_flag])
 
     # In[45]:
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
     for strat_flag in range(nstrats):
-        im = axes[strat_flag].imshow(flws[strat_flag].T,origin='lower',cmap='seismic')
-        axes[strat_flag].set_title(titles[strat_flag])
-        fig.colorbar(im, ax=axes[strat_flag])
-    plt.suptitle('Field-line windings')
-    plt.tight_layout()
-    plt.savefig('extra_plots/flw.png')
-    plt.close()
-
+        im = axes[1,strat_flag].imshow(flws[strat_flag].T,origin='lower',cmap='seismic')
+        fig.colorbar(im, ax=axes[1,strat_flag])
+        axes[1,strat_flag].set_title('FLE' + paths[strat_flag])
 
     # In[46]:
 
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
     for strat_flag in range(nstrats):
-        im = axes[strat_flag].imshow(flhBzs[strat_flag].T,origin='lower',cmap='seismic')
-        axes[strat_flag].set_title(titles[strat_flag])
-        fig.colorbar(im, ax=axes[strat_flag])
-    plt.suptitle('Weighted Field-line helicities')
-    plt.tight_layout()
-    plt.savefig('extra_plots/flhw.png')
-    plt.close()
-
+        im = axes[2,strat_flag].imshow(flhBzs[strat_flag].T,origin='lower',cmap='seismic')
+        fig.colorbar(im, ax=axes[2,strat_flag])
+        axes[2,strat_flag].set_title('WFLH' + paths[strat_flag])
 
     # In[ ]:
 
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
     for strat_flag in range(nstrats):
-        im = axes[strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic')
-        axes[strat_flag].set_title(titles[strat_flag])
-        fig.colorbar(im, ax=axes[strat_flag])
-    plt.suptitle('Twists')
-    plt.tight_layout()
-    plt.savefig('extra_plots/tw.png')
-    plt.close()
+        im = axes[3,strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic')
+        fig.colorbar(im, ax=axes[3,strat_flag])
+        axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
 
+    plt.tight_layout()
+    plt.show()
+    plt.savefig('./quantity_plots/%d.png' % snap_id)
+    plt.close()
 
     # In[ ]:
 
