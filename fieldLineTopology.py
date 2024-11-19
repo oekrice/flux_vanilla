@@ -3,7 +3,7 @@
 
 import numpy as np 
 from matplotlib import pyplot as plt
-from scipy.fft import ifft2,fft2,fftfreq, fftshift, ifftshift
+from scipy.fft import ifft, fft, ifft2,fft2,fftfreq, fftshift, ifftshift
 from scipy.interpolate import RegularGridInterpolator
 from scipy.integrate import simps
 from streamtracer import StreamTracer, VectorGrid
@@ -28,29 +28,55 @@ def getFrequencyMatrix(N1,N2):
     freqlist1da = np.arange(N1)
     freqlist2da = np.arange(N2)
 
-    return np.array([np.array([np.array([2.0*np.pi*freqlist1da[i],2.0*np.pi*freqlist1db[j]]) for j in range(len(freqlist1db))]) for i  in range(len(freqlist1da))]);                                  
+    return np.array([np.array([np.array([freqlist1da[i],freqlist1db[j]]) for j in range(len(freqlist1db))]) for i  in range(len(freqlist1da))]);
 
-def getAFastSingle(b):
+def testfourier(b):
+    #Integrates bx in the x direction, using the Fourier method
+    ncells = np.shape(b)[0]
+    dx = 200/ncells
+    ks = np.arange(ncells)
+    ks[0] = 1
+    bx = b[:,ncells//2,ncells//2,0]
+    bx = bx - np.sum(bx)/len(bx)
 
-    ncells = 128
-    dcells = 260/128
+    bk = fft(bx)
+    ak = dx*bk*ncells/(2*np.pi*1j*ks)
+    ak[0] = 0.0
+    ax = ifft(ak)
+    bx_test = bx.copy()
+    bx_test[1:-1] = (ax[2:] - ax[:-2])/dx
+
+    plt.plot(bx)
+    plt.plot(bx_test)
+    plt.show()
+
+
+def getAFastSingle(b, grid_spacing):
+
+    ncells = np.shape(b)[0]
+    dcells = grid_spacing[0]
 
     fm = getFrequencyMatrix(b.shape[0],b.shape[1]);
+    print(np.shape(fm))
     # make the basis
     kparr = np.array([np.array([norm2d(fm[i][j]) for j in range(len(fm[0]))]) for i  in range(len(fm))]);
     kperp = np.array([np.array([np.array([-kparr[i][j][1],kparr[i][j][0],0.0]) for j in range(len(fm[0]))]) for i  in range(len(fm))])
     # note in the k matrix below the k=0 element is set to one so we can divide by it.
-    k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j])/(2*dcells*ncells) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T
+    k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j]) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T
+    #for i in range(ncells):
+    #    for j in range(ncells):
+    #        k[i,j] = i*j
+    #k[0,0] = 1.0
     A = np.zeros(b.shape)
 
     for i in range(b.shape[2]):
         fbx = fft2(b[:,:,i,0]); fby =fft2(b[:,:,i,1]); fbz = fft2(b[:,:,i,2])
-        akperp = -1j*fbz/k
+        akperp = -ncells*dcells*1j*fbz/(2*np.pi*k)
         ## fix i =j  elementz
-        akperp[0][0]=0.0
-        akw = 1j*(-(kparr[:,:,1])*fbx + (kparr[:,:,0])*fby)/k
+        akperp[0][0]= 0.0
+        akw = ncells*dcells*1j*(-(kparr[:,:,1])*fbx + (kparr[:,:,0])*fby)/(2*np.pi*k)
         ## fix i =j  element
-        akw[0][0]=0.0
+        akw[0][0]= 0.0
         aftx = akperp*kperp[:,:,0]
         afty = akperp*kperp[:,:,1]
         aftz = akperp*kperp[:,:,2]+akw
@@ -61,39 +87,6 @@ def getAFastSingle(b):
         A[:,:,i,1] = np.real(ay)
         A[:,:,i,2] = np.real(az)
     return A
-
-
-def getAFast(bx,by,bz):
-
-
-    fm = getFrequencyMatrix(bx.shape[0],bx.shape[1]); 
-    # make the basis
-    normFunc = np.vectorize(norm2d)
-    kparr = np.array([np.array([norm2d(fm[i][j]) for j in range(len(fm[0]))]) for i  in range(len(fm))]);
-    kperp = np.array([np.array([np.array([-kparr[i][j][1],kparr[i][j][0],0.0]) for j in range(len(fm[0]))]) for i  in range(len(fm))])
-    # note in the k matrix below the k=0 element is set to one so we can divide by it.
-    k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j])*dcells for i in range(len(fm))]) for j  in range(len(fm[0]))]).T
-    Ax = np.zeros(bx.shape)
-    Ay = np.zeros(by.shape)
-    Az = np.zeros(bz.shape)
-    for i in range(bx.shape[2]):
-        fbx = fft2(bx[:,:,i]); fby =fft2(by[:,:,i]); fbz = fft2(bz[:,:,i])
-        akperp = -1j*fbz/k
-        ## fix i =j  element
-        akperp[0][0]=0.0
-        akw = 1j*(-kparr[:,:,1]*fbx + kparr[:,:,0]*fby)/k
-        ## fix i =j  element
-        akw[0][0]=0.0    
-        aftx = akperp*kperp[:,:,0]
-        afty = akperp*kperp[:,:,1]
-        aftz = akperp*kperp[:,:,2]+akw
-        ax = ifft2(aftx)
-        ay = ifft2(afty)
-        az = ifft2(aftz)
-        Ax[:,:,i] = np.real(ax)
-        Ay[:,:,i] = np.real(ay)
-        Az[:,:,i] = np.real(az)
-    return Ax,Ay,Az
 
 def getHelicity(bx,by,bz,ax,ay,az):
     return np.sum(ax*bx + ay*by + az*bz)

@@ -41,7 +41,7 @@ if False:
 paths = ['./Data_15/', './Data_50/', './Data_150/']
 titles = ['Strat ratio 15', 'Strat ratio 50', 'Strat ratio 150']
 
-nstrats = 3
+nstrats = 1
 
 for strat_flag in range(nstrats):   #do unstratified (top) and stratified (bottom)
     print('Dealing with field number', strat_flag)
@@ -62,11 +62,24 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     by = 0.5*(byOg[:,1:,:] + byOg[:,:-1,:])
     bz = 0.5*(bzOg[:,:,1:] + bzOg[:,:,:-1])
 
+    ncells = 128  #Cut a bit off to test if I'm right about the scaling. I'm not...
+    prop = 0
+    if prop > 0:
+        bx = bx[prop:-prop,prop:-prop,prop:-prop]
+        by = by[prop:-prop,prop:-prop,prop:-prop]
+        bz = bz[prop:-prop,prop:-prop,prop:-prop]
+
+
+    print('Net flux', np.sum(bz[:,:,0]))
+    bz = bz - np.sum(bz[:,:,0])/np.size(bz[:,:,0])
+    print('Net flux', np.sum(bz[:,:,0]))
+
     ncells = int(np.size(bx)**(1/3)) + 1
+    print(ncells)
     #Reshape so its 0= x comp 1 =y comp 2 = z comp
 
-    xv = np.linspace(-130,130,ncells)
-    yv = np.linspace(-130,130,ncells)
+    xv = np.linspace(-0,2*np.pi,ncells)
+    yv = np.linspace(-0,2*np.pi,ncells)
     zv = np.linspace(-25,100,ncells)
 
     X, Y = np.meshgrid(xv, yv, indexing='ij')
@@ -89,7 +102,7 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     #z component seems a bit wrong
     z_photo = int((ncells)*(10.0 - zv[0])/(zv[-1] - zv[0]))
 
-    AField = flt.getAFastSingle(bField)
+    AField = flt.getAFastSingle(bField,grid_spacing)
 
     bField_test = flt.curl(AField,grid_spacing)
 
@@ -97,14 +110,14 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     #calculate the winding gauge for the unit speed field
     usf = flt.unitSpeedField(bField.copy(),0.01)  #transforms bz to be 'unit speed' in the z direction
     BUnit = flt.addDivergenceCleaningTerm(usf,grid_spacing)   #Returns unit speed field. Makes some sense... But why has BField changed?
-    AWind = flt.getAFastSingle(BUnit)
+    AWind = flt.getAFastSingle(BUnit,grid_spacing)
 
     curlField= flt.curl(bField,grid_spacing)
 
-    '''
-    for i in range(3):
-        comp = bField_test[:,:,z_photo, i].T/bField[:,:,z_photo, i].T
+    #flt.testfourier(bField)
 
+
+    '''
     for i in range(3):
         im = axes[2,i].pcolormesh(BUnit[:,:,z_photo, i].T)
         fig.colorbar(im, ax=axes[2,i])
@@ -124,7 +137,7 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     AConst = flt.AConst(bzConst,points,dA,[ncells, ncells, ncells])
     AField = AField + AConst
 
-    '''
+
     fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(10, 7))
     for i in range(3):
         im = axes[0,i].pcolormesh(bField[:,:,z_photo, i].T)
@@ -137,7 +150,18 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
     plt.tight_layout()
     plt.show()
 
-    '''
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 7))
+
+    for i in range(3):
+        vmin = 1e6; vmax =  -1e6
+        comp = bField[:,:,z_photo, i].T/bField_test[:,:,z_photo, i].T
+        vmin = min(vmin, np.percentile(comp, 10))
+        vmax = max(vmin, np.percentile(comp, 90))
+
+        im = axes[i].pcolormesh(comp[:,:].T,vmin=vmin,vmax=vmax)
+        fig.colorbar(im, ax = axes[i])
+    plt.tight_layout()
+    plt.show()
     # In[72]:
 
     # calculate the field line helcity and winding densities
@@ -268,7 +292,7 @@ for strat_flag in range(nstrats):   #do unstratified (top) and stratified (botto
         twistFs.append(twistF)
 
 # In[44]:
-if True:
+if False:
     fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(10, 10))
 
     vmin = 1e6; vmax =  -1e6
