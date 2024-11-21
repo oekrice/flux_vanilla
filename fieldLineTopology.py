@@ -3,7 +3,7 @@
 
 import numpy as np 
 from matplotlib import pyplot as plt
-from scipy.fft import ifft, fft, ifft2,fft2,fftfreq, fftshift, ifftshift
+from scipy.fft import ifft2,fft2,fftfreq, fftshift, ifftshift,ifft,fft
 from scipy.interpolate import RegularGridInterpolator
 from scipy.integrate import simps
 from streamtracer import StreamTracer, VectorGrid
@@ -21,72 +21,67 @@ def norm2d(vec):
     return np.array([v[0],v[1],0.0])
 
 
-def getFrequencyMatrix(N1,N2):
-    freqlist1da = np.roll(np.linspace(-N1/(2),N1/(2)-1,N1),round(N1/2))
-    freqlist1db = np.roll(np.linspace(-N2/(2),N2/(2)-1,N2),round(N2/2))
+def getFrequencyMatrix(ncells,spacing):
+    freqlist1da =np.roll(np.linspace(-ncells[0]/2,ncells[0]/2-1,ncells[0]),round(ncells[0]/2))/(ncells[0]*spacing[0])
+    freqlist1db =np.roll(np.linspace(-ncells[1]/2,ncells[1]/2-1,ncells[1]),round(ncells[1]/2))/(ncells[1]*spacing[1])
+    return np.array([np.array([np.array([2.0*np.pi*freqlist1da[i],2.0*np.pi*freqlist1db[j]]) for j in range(len(freqlist1db))]) for i  in range(len(freqlist1da))]);       
 
-    freqlist1da = np.arange(N1)
-    freqlist2da = np.arange(N2)
-
-    return np.array([np.array([np.array([freqlist1da[i],freqlist1db[j]]) for j in range(len(freqlist1db))]) for i  in range(len(freqlist1da))]);
-
-def testfourier(b):
-    #Integrates bx in the x direction, using the Fourier method
-    ncells = np.shape(b)[0]
-    dx = 200/ncells
-    ks = np.arange(ncells)
-    ks[0] = 1
-    bx = b[:,ncells//2,ncells//2,0]
-    bx = bx - np.sum(bx)/len(bx)
-
-    bk = fft(bx)
-    ak = dx*bk*ncells/(2*np.pi*1j*ks)
-    ak[0] = 0.0
-    ax = ifft(ak)
-    bx_test = bx.copy()
-    bx_test[1:-1] = (ax[2:] - ax[:-2])/dx
-
-    plt.plot(bx)
-    plt.plot(bx_test)
-    plt.show()
+def getFrequencyMatrixVert(ncells,spacing):
+    freqlist1 = np.roll(np.linspace(-ncells[2]/2,ncells[2]/2-1,ncells[2]),round(ncells[2]/2))/(ncells[2]*spacing[2])
+    return np.array([2.0*np.pi*freqlist1[i] for i  in range(len(freqlist1))]);       
 
 
-def getAFastSingle(b, grid_spacing):
-
-    ncells = np.shape(b)[0]
-    dcells = grid_spacing[0]
-
-    fm = getFrequencyMatrix(b.shape[0],b.shape[1]);
-    print(np.shape(fm))
+def getAFastSingle(b,ncells,spacing):
+    fm = getFrequencyMatrix(ncells,spacing);
     # make the basis
     kparr = np.array([np.array([norm2d(fm[i][j]) for j in range(len(fm[0]))]) for i  in range(len(fm))]);
     kperp = np.array([np.array([np.array([-kparr[i][j][1],kparr[i][j][0],0.0]) for j in range(len(fm[0]))]) for i  in range(len(fm))])
     # note in the k matrix below the k=0 element is set to one so we can divide by it.
-    k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j]) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T
-    #for i in range(ncells):
-    #    for j in range(ncells):
-    #        k[i,j] = i*j
-    #k[0,0] = 1.0
+    k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j]) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T    
     A = np.zeros(b.shape)
-
+    B0fx = np.zeros(b.shape[2],dtype=np.complex128)
+    B0fy = np.zeros(b.shape[2],dtype=np.complex128)
+    aftx = np.zeros([b.shape[0],b.shape[1],b.shape[2]],dtype=np.complex128)
+    afty  =np.zeros([b.shape[0],b.shape[1],b.shape[2]],dtype=np.complex128)
+    aftz = np.zeros([b.shape[0],b.shape[1],b.shape[2]],dtype=np.complex128)
     for i in range(b.shape[2]):
         fbx = fft2(b[:,:,i,0]); fby =fft2(b[:,:,i,1]); fbz = fft2(b[:,:,i,2])
-        akperp = -ncells*dcells*1j*fbz/(2*np.pi*k)
-        ## fix i =j  elementz
-        akperp[0][0]= 0.0
-        akw = ncells*dcells*1j*(-(kparr[:,:,1])*fbx + (kparr[:,:,0])*fby)/(2*np.pi*k)
+        #set the zero element of the transform for the final vertical part
+        B0fx[i] = fbx[0][0]
+        B0fy[i] = fby[0][0]
+        akperp = -1j*fbz/k
         ## fix i =j  element
-        akw[0][0]= 0.0
-        aftx = akperp*kperp[:,:,0]
-        afty = akperp*kperp[:,:,1]
-        aftz = akperp*kperp[:,:,2]+akw
-        ax = ifft2(aftx)
-        ay = ifft2(afty)
-        az = ifft2(aftz)
+        #print(akperp[0][0],fbz[0][0])
+        akperp[0][0]=0.0
+        akw = 1j*(-(kparr[:,:,1])*fbx + (kparr[:,:,0])*fby)/k
+        ## fix i =j  element
+        akw[0][0]=0.0    
+        aftx[:,:,i] = akperp*kperp[:,:,0]
+        afty[:,:,i] = akperp*kperp[:,:,1]
+        aftz[:,:,i] = akperp*kperp[:,:,2]+akw
+    # now do the vertical transforms
+    kz= getFrequencyMatrixVert(ncells,spacing)
+    fB0fx = fft(B0fx)
+    fB0fy = fft(B0fy)
+    kz[0]=1.0
+    ax00 = -1j*fB0fy/kz
+    ay00 =  1j*fB0fx/kz
+    ax00[0]=0.0
+    ay00[0]=0.0
+    ax00 = ifft(ax00)
+    ay00 = ifft(ay00)
+    #finally transform back to real space
+    for i in range(b.shape[2]):
+        aftx[0][0] = ax00[i]
+        afty[0][0] = ay00[i]
+        ax = ifft2(aftx[:,:,i])
+        ay = ifft2(afty[:,:,i])
+        az = ifft2(aftz[:,:,i])
         A[:,:,i,0] = np.real(ax)
         A[:,:,i,1] = np.real(ay)
         A[:,:,i,2] = np.real(az)
     return A
+
 
 def getHelicity(bx,by,bz,ax,ay,az):
     return np.sum(ax*bx + ay*by + az*bz)
@@ -106,7 +101,7 @@ def getFLHDenSingle(b,a):
     return vector_norm(multProd)/bmag
 
 def getAWindFast(bx,by,bz):
-    fm = getFrequencyMatrix(bx.shape[0],bx.shape[1]); 
+    fm = getFrequencyMatrix(ncells,spacing);
     # make the basis
     normFunc = np.vectorize(norm2d)
     kparr = np.array([np.array([norm2d(fm[i][j]) for j in range(len(fm[0]))]) for i  in range(len(fm))]);
@@ -206,9 +201,9 @@ def getCurve(tracer,index,zv):
     return cv.T[0],cv.T[1],cv.T[2]
 
 def getCurveVec(tracer,index,zv):
-    cv = tracer.xs[index]
+    cv =tracer.xs[index]
     mask = (cv[:, 2]> zv)
-    cv = cv[mask, :]
+    cv =cv[mask, :]
     return cv
     
 def getInterpolatedQuantity(data,spacings):
@@ -247,11 +242,11 @@ def fieldLineIntegratedQuantity(interpolatedQuantity,bx,by,bz,nx,ny,lx,ly,goodSe
 
         
 def createSingleField(bx,by,bz):
-    fieldOut = np.zeros((bx.shape[0],bx.shape[1],bx.shape[2],3));
-    fieldOut[:,:,:,0]=bx
-    fieldOut[:,:,:,1]=by
-    fieldOut[:,:,:,2]=bz
-    return fieldOut
+        fieldOut = np.zeros((bx.shape[0],bx.shape[1],bx.shape[2],3));
+        fieldOut[:,:,:,0]=bx
+        fieldOut[:,:,:,1]=by
+        fieldOut[:,:,:,2]=bz
+        return fieldOut
 
 def curl(b_field,steps):  # (x, y, z)
     _, dFx_dy, dFx_dz = np.gradient(b_field[..., 0],axis=[0, 1, 2], edge_order=2)
@@ -337,13 +332,13 @@ def magForFt(vec):
     mag = np.linalg.norm(vec)
     return mag
 
-def addDivergenceCleaningTerm(Bfield,spacing):
+def addDivergenceCleaningTerm(Bfield,ncells,spacing):
     divField = divergence(Bfield,spacing)
-    fm = getFrequencyMatrix(divField.shape[0],divField.shape[1]); 
+    fm = getFrequencyMatrix(ncells,spacing);
     # note in the k matrix below the k=0 element is set to one so we can divide by it.
     k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j]) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T    
     divFreeField = np.zeros(Bfield.shape)
-    for i in range(Bfield.shape[2]):  #Run through z slices
+    for i in range(Bfield.shape[2]):
         # get the transformed divergence 
         divF = fft2(divField[:,:,i])
         divergenceFactor = -1j*divF/k
@@ -360,7 +355,7 @@ def addDivergenceCleaningTerm(Bfield,spacing):
 
 def addDivergenceCleaningTermTest(Bfield,spacing):
     divField = divergenceForWind(Bfield,spacing)
-    fm = getFrequencyMatrix(divField.shape[0],divField.shape[1]); 
+    fm = getFrequencyMatrix(ncells,spacing);
     # note in the k matrix below the k=0 element is set to one so we can divide by it.
     k = np.array([np.array([1.0 if i==j==0 else np.linalg.norm(fm[i][j]) for i in range(len(fm))]) for j  in range(len(fm[0]))]).T    
         # get the transformed divergence 
