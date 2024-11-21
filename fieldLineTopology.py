@@ -163,9 +163,9 @@ def getInterpolatedFieldSingle(b,dx,dy,dz):
     y = np.linspace(0,dy*(b.shape[1]-1),b.shape[1])
     z = np.linspace(0,dz*(b.shape[2]-1),b.shape[2])
     xg, yg ,zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
-    bxInterp = RegularGridInterpolator((x, y, z), b[:,:,:,0])
-    byInterp = RegularGridInterpolator((x, y, z), b[:,:,:,1])
-    bzInterp = RegularGridInterpolator((x, y, z), b[:,:,:,2])
+    bxInterp = RegularGridInterpolator((x, y, z), b[:,:,:,0], bounds_error=False, fill_value=0.0)
+    byInterp = RegularGridInterpolator((x, y, z), b[:,:,:,1], bounds_error=False, fill_value=0.0)
+    bzInterp = RegularGridInterpolator((x, y, z), b[:,:,:,2], bounds_error=False, fill_value=0.0)
     return bxInterp,byInterp,bzInterp
 
 def makePoints(x,y,z):
@@ -419,7 +419,7 @@ def prepareCurves(field,bxInterp,byInterp,bzinterp,gridSpacing,xrange,yrange,zv,
                 curve= getCurveVec(tracer,i,zv)
                 fieldLinesList.append(np.array(curve))
         # sometimes you get odd field lines due to weak field, we cut this off at 10% of bcut
-        fieldLinesList = [chopWeakFieldLine(bxInterp,byInterp,bzinterp,fl,bcut/10.0) for fl in fieldLinesList] 
+        fieldLinesList = [chopWeakFieldLine(bxInterp,byInterp,bzinterp,fl,bcut) for fl in fieldLinesList]
         return fieldLinesList,goodSeeds,seeds 
     
 def fieldLineIntegratedQuantity(interpolatedQuantity,goodSeeds,fieldLines,seeds,nx,ny):
@@ -447,10 +447,10 @@ def aConst(bvalue,xymeshIn,pt,dA,indexIgnore):
 def AConst(bvalue,xymesh,dA,grid):
     aslice =  (1.0/(2.0*np.pi))*np.array([aConst(bvalue,xymesh,xymesh[i],dA,i) for i in range(len(xymesh))])
     AconsGrid = np.zeros((grid[0],grid[1],grid[2],3))
+    print(grid[0], grid[1], grid[2])
     for i in range(grid[2]):
         AconsGrid[:,:,i] = aslice.reshape((grid[0],grid[1],3))
     return AconsGrid
-    
     
 def twistDen(bField,curlField,tol):
     bmag = vector_norm(bField*bField)

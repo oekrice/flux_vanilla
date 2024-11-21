@@ -8,8 +8,21 @@ PROGRAM fltrace
 
     IMPLICIT NONE
 
+    CHARACTER(LEN=64):: input_value
+    CHARACTER(LEN=64):: parameter_filename
+    CHARACTER(LEN=4):: run_id
+
+
+    call get_command_argument(1, input_value)
+    read(unit=input_value,fmt=*) run
+
+    write (run_id,'(I3.3)') run
+    parameter_filename = trim('./fl_data/flparameters'//trim(run_id)//'.txt')
+
+    print*, parameter_filename
     !Import parameters from text file (saved out by python in the fltrace directory)
-    open(1,file= "./fl_data/flparameters.txt")
+    !Need to update this so it can do different numbers
+    open(1,file= parameter_filename)
     read(1, *) flparameters
     close(1)
 
@@ -57,9 +70,18 @@ PROGRAM fltrace
 
     INTEGER:: i
     REAL(num), DIMENSION(:):: starts_import(0:nstarts*3-1)
+    CHARACTER(LEN=64):: starts_filename
+    CHARACTER(LEN=4):: run_id
+
+
     ALLOCATE(starts(0:nstarts-1,0:2))
 
-    open(1,file= "./fl_data/starts.txt")
+    write (run_id,'(I3.3)') run
+
+    print*, run, run_id
+    starts_filename = trim('./fl_data/starts'//trim(run_id)//'.txt')
+
+    open(1,file= starts_filename)
     read(1, *) starts_import
     close(1)
 

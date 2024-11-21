@@ -32,7 +32,7 @@ class trace_fieldlines():
 
         #Establish grid parameters (can be read in from elsewhere of course)
         for snap_number in range(snap_min, snap_max):
-            self.run = 0
+            self.run = snap_number
             self.snap = snap_number
             self.print_flag = 1
 
@@ -87,11 +87,14 @@ class trace_fieldlines():
             #Folder admin
             if not os.path.exists('./fl_data/'):
                 os.mkdir('fl_data')
-            os.system('rm ./fl_data/flines.nc')
+
+            os.system('rm ./fl_data/flines%03d.nc' % self.snap)
 
             flh = FLH(self)    #Do field-line helicity things
 
             self.flh_photo = flh.flh_photo #FLH density on the photosphere
+
+            #self.flh_photo = np.ones((self.nx, self.ny))
             #Find start points
             self.set_starts()
             #Create runtime variables for fortran
@@ -104,10 +107,14 @@ class trace_fieldlines():
                     os.mkdir('plots')
                 self.plot_vista()
 
+            os.system('rm ./fl_data/flines%03d.nc' % self.snap)
+            os.system('rm ./fl_data/flparameters%03d.txt' % self.snap)
+            os.system('rm ./fl_data/starts%03d.txt' % self.snap)
+
     def plot_vista(self):
         print('Plotting...')
         x, y = np.meshgrid(self.xs, self.ys)
-        z = 0*x*y
+        z = 10*np.ones((np.shape(x)))
         surface = pv.StructuredGrid(x, y, z)
         p = pv.Plotter(off_screen=True)
         p.background_color = "black"
@@ -249,20 +256,20 @@ class trace_fieldlines():
         variables[14] = self.ds
         variables[15] = self.weakness_limit
 
-        np.savetxt('./fl_data/flparameters.txt', variables)   #variables numbered based on run number (up to 1000)
-        np.savetxt('./fl_data/starts.txt', self.starts)   #Coordinates of the start points of each field line (do this in python)
+        np.savetxt('./fl_data/flparameters%03d.txt' % self.snap, variables)   #variables numbered based on run number (up to 1000)
+        np.savetxt('./fl_data/starts%03d.txt' % self.snap, self.starts)   #Coordinates of the start points of each field line (do this in python)
 
     def trace_lines_fortran(self):
         os.system('make')
         if os.uname()[1] == 'brillouin.dur.ac.uk':
-            os.system('/usr/lib64/openmpi/bin/mpiexec -np 1 ./bin/fltrace')
+            os.system('/usr/lib64/openmpi/bin/mpiexec -np 1 ./bin/fltrace %d' % self.snap)
         elif os.uname()[1] == 'login1.ham8.dur.ac.uk' or os.uname()[1] == 'login2.ham8.dur.ac.uk':
-            os.system('mpiexec -np 1 ./bin/fltrace')
+            os.system('mpiexec -np 1 ./bin/fltrace %d' % self.snap)
         else:
-            os.system('mpirun -np 1 ./bin/fltrace')
+            os.system('mpirun -np 1 ./bin/fltrace %d' % self.snap)
 
         try:
-            data = netcdf_file('./fl_data/flines.nc', 'r', mmap=False)
+            data = netcdf_file('./fl_data/flines%03d.nc' % self.snap, 'r', mmap=False)
             print('Field lines found')
 
         except:

@@ -101,8 +101,11 @@ MODULE grid
 
     character(len=64):: filename
     integer:: aid, bid, cid, vid, ncid
+    CHARACTER(LEN=4):: run_id
 
-    filename = "./fl_data/flines.nc"
+    write (run_id,'(I3.3)') run
+
+    filename = trim('./fl_data/flines'//trim(run_id)//'.nc')
 
     call try(nf90_create(trim(filename), nf90_clobber, ncid))
 
