@@ -277,4 +277,10 @@ class trace_fieldlines():
 
         self.lines = np.swapaxes(data.variables['lines'][:],0,2)
 
-trace_fieldlines(snap_min = 300, snap_max = 301)
+
+if len(sys.argv) > 1:
+    snap_min = int(sys.argv[1])
+else:
+    snap_min = 0
+
+trace_fieldlines(snap_min = snap_min, snap_max = snap_min+1)
