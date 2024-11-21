@@ -28,7 +28,11 @@ from get_flh import FLH
 class trace_fieldlines():
     def __init__(self, snap_min, snap_max):
         #Establish random seeds for field line plotting
-        self.start_seeds = random.rand(1000**2)
+        if not os.path.isfile('start_seeds.txt'):
+            self.start_seeds = random.rand(1000**2)
+            np.savetxt('start_seeds.txt', self.start_seeds, delimiter = ',')
+        else:
+            self.start_seeds = np.loadtxt('start_seeds.txt', delimiter = ',')
 
         #Establish grid parameters (can be read in from elsewhere of course)
         for snap_number in range(snap_min, snap_max):
@@ -87,8 +91,6 @@ class trace_fieldlines():
             #Folder admin
             if not os.path.exists('./fl_data/'):
                 os.mkdir('fl_data')
-
-            os.system('rm ./fl_data/flines%03d.nc' % self.snap)
 
             flh = FLH(self)    #Do field-line helicity things
 
