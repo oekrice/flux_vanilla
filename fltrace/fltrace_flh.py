@@ -7,6 +7,9 @@ Created on Thu Dec  8 15:16:37 2022
 
 Python wrapper for fortran field line tracer
 
+Uses FLH density on the photosphere to determine which lines to trace.
+
+Needs routine from emergence_comparisons to do that. Bit of a mess...
 """
 
 
@@ -19,6 +22,7 @@ import time
 from scipy.io import netcdf_file
 import matplotlib.pyplot as plt
 import pyvista as pv
+from get_flh import FLH
 #pv.start_xvfb()
 
 class trace_fieldlines():
@@ -43,6 +47,7 @@ class trace_fieldlines():
             self.line_plot_length = 100  #To save time while plotting, reduce the length of the plotted lines
 
             data = netcdf_file('%s%04d.nc' % (self.data_root, self.snap), 'r', mmap=False)
+            self.bx = np.swapaxes(data.variables['bx'][:],0,2)
             self.by = np.swapaxes(data.variables['by'][:],0,2)
             self.bz = np.swapaxes(data.variables['bz'][:],0,2)
             data.close()
@@ -75,11 +80,18 @@ class trace_fieldlines():
             self.yc[-1] = self.yc[-2] + (self.yc[-2] - self.yc[-3])
             self.zc[-1] = self.zc[-2] + (self.zc[-2] - self.zc[-3])
 
+            self.dx = self.xs[1] - self.xs[0]
+            self.dy = self.ys[1] - self.ys[0]
+            self.dz = self.zs[1] - self.zs[0]
 
             #Folder admin
             if not os.path.exists('./fl_data/'):
                 os.mkdir('fl_data')
             os.system('rm ./fl_data/flines.nc')
+
+            flh = FLH(self)    #Do field-line helicity things
+
+            self.flh_photo = flh.flh_photo #FLH density on the photosphere
             #Find start points
             self.set_starts()
             #Create runtime variables for fortran
@@ -115,9 +127,9 @@ class trace_fieldlines():
             doplot = True
             if line_length == 0:
                 doplot = False
-            elif line[0][2] < 1.0 and line[-1][2] > 20.0:
-                doplot = False
 
+            if line[-1][2] > 11.0 and line[-1][2] < 99.0:
+                doplot = False
             if doplot:
                 p.add_mesh(pv.Spline(line, len(line)),color='white',line_width=0.25)
 
@@ -182,12 +194,14 @@ class trace_fieldlines():
             #Plot up from the surface, based on some threshold of how strong the magnetic field is... Could be fun.
             z_photo = int((self.nz)*(10.0 - self.z0)/(self.z1 - self.z0))
 
-            surface_array = self.bz[:,:,z_photo]   #Distribution of surface magnetic field
+            surface_array = self.bz[:,:,z_photo]   #Distribution of surface magnetic field. This array is all that needs changing
+            surface_array = self.flh_photo   #Distribution of surface FLH
+
             max_surface = np.max(np.abs(surface_array)) + 1e-6
 
             nlines = 1000
 
-            alpha = 1.5
+            alpha = 2.0
             alphasum = np.sum(np.abs(surface_array)**alpha)
             pb = max_surface**alpha*nlines/alphasum
 
@@ -202,7 +216,6 @@ class trace_fieldlines():
                     if self.start_seeds[cellcount] < pb*prop**alpha:
                         self.starts.append([self.xc[i+1],self.yc[j+1],10.0])
                     cellcount += 1
-
 
             print('Tracing', len(self.starts), 'lines')
 
