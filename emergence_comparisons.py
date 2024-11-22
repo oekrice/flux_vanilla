@@ -41,7 +41,7 @@ if False:
 paths = ['./Data_15/', './Data_50/', './Data_150/']
 titles = ['Strat ratio 15', 'Strat ratio 50', 'Strat ratio 150']
 
-nstrats = 1
+nstrats = 3
 
 for strat_flag in range(nstrats):   #do unstratified (top) and stratified (bottom)
     print('Dealing with field number', strat_flag)
@@ -340,6 +340,8 @@ if True:
         im = axes[3,strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[3,strat_flag])
         axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
+
+    plt.suptitle('Snap id %d' % snap_id)
 
     plt.tight_layout()
     #plt.show()
