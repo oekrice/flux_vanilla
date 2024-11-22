@@ -27,8 +27,8 @@ PROGRAM fltrace
     close(1)
 
     !##########################################
-    !DATA ROOT HERE
-    data_root = '../Data_150/'
+    !DATA ROOT HERE. NEED TO READ IN AS STRING REALLY
+    data_root = '../Data_15/'
 
     ! Put some of the major variables in here - things that can be changed occasionally but not in a series of runs
 

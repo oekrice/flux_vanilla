@@ -307,9 +307,12 @@ if True:
         im = axes[0,strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[0,strat_flag])
         axes[0,strat_flag].set_title('FLH' + paths[strat_flag])
-    im = axes[0,2].imshow(flhs[1].T - flhs[0].T,origin='lower',cmap='seismic')
+
+    diff = flhs[1].T - flhs[0].T
+
+    im = axes[0,2].imshow(diff,origin='lower',cmap='seismic',vmin=-np.max(np.abs(diff)),vmax=np.max(np.abs(diff)) )
     fig.colorbar(im, ax=axes[0,2])
-    axes[0,strat_flag].set_title('FLH Difference')
+    axes[0,2].set_title('FLH Difference')
 
     # In[45]:
     vmin = 1e6; vmax =  -1e6
@@ -322,9 +325,11 @@ if True:
         fig.colorbar(im, ax=axes[1,strat_flag])
         axes[1,strat_flag].set_title('FLW' + paths[strat_flag])
 
-    im = axes[1,2].imshow(flws[1].T - flws[0].T,origin='lower',cmap='seismic')
+    diff = flws[1].T - flws[0].T
+
+    im = axes[1,2].imshow(diff,origin='lower',cmap='seismic',vmin=-np.max(np.abs(diff)),vmax=np.max(np.abs(diff)) )
     fig.colorbar(im, ax=axes[1,2])
-    axes[1,strat_flag].set_title('FLW Difference')
+    axes[1,2].set_title('FLW Difference')
 
     # In[46]:
 
@@ -337,9 +342,11 @@ if True:
         fig.colorbar(im, ax=axes[2,strat_flag])
         axes[2,strat_flag].set_title('WFLH' + paths[strat_flag])
 
-    im = axes[2,2].imshow(flhBzs[1].T - flhBzs[0].T,origin='lower',cmap='seismic')
+    diff = flhBzs[1].T - flhBzs[0].T
+
+    im = axes[2,2].imshow(diff,origin='lower',cmap='seismic',vmin=-np.max(np.abs(diff)),vmax=np.max(np.abs(diff)) )
     fig.colorbar(im, ax=axes[2,2])
-    axes[2,strat_flag].set_title('WFLW Difference')
+    axes[2,2].set_title('WFLW Difference')
 
     # In[ ]:
 
@@ -352,9 +359,10 @@ if True:
         fig.colorbar(im, ax=axes[3,strat_flag])
         axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
 
-    im = axes[3,2].imshow(twistFs[1].T - twistFs[0].T,origin='lower',cmap='seismic')
+    diff = twistFs[1].T - twistFs[0].T
+    im = axes[3,2].imshow(diff,origin='lower',cmap='seismic',vmin=-np.max(np.abs(diff)),vmax=np.max(np.abs(diff)) )
     fig.colorbar(im, ax=axes[3,2])
-    axes[3,strat_flag].set_title('Twists Difference')
+    axes[3,2].set_title('Twists Difference')
 
 
 

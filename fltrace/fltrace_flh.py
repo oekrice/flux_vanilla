@@ -41,8 +41,14 @@ class trace_fieldlines():
             self.print_flag = 1
 
             self.save_number = self.snap
-            self.data_root = '../Data_150/'
             self.option = 3   #tracing a plotting options (1 for jet, 2 for emergence)
+
+            self.data_root = '../Data_15/'
+            data = netcdf_file('%s%04d.nc' % (self.data_root, self.snap), 'r', mmap=False)
+            self.bx = np.swapaxes(data.variables['bx'][:],0,2)
+            self.by = np.swapaxes(data.variables['by'][:],0,2)
+            self.bz = np.swapaxes(data.variables['bz'][:],0,2)
+            data.close()
 
             #Establish start points for the field line plotting
             self.max_line_length = 10000
@@ -50,11 +56,6 @@ class trace_fieldlines():
             self.weakness_limit = 1e-2   #Minimum field strength to stop plotting
             self.line_plot_length = 100  #To save time while plotting, reduce the length of the plotted lines
 
-            data = netcdf_file('%s%04d.nc' % (self.data_root, self.snap), 'r', mmap=False)
-            self.bx = np.swapaxes(data.variables['bx'][:],0,2)
-            self.by = np.swapaxes(data.variables['by'][:],0,2)
-            self.bz = np.swapaxes(data.variables['bz'][:],0,2)
-            data.close()
             #Import bz as a test of the resolutions (and for the pyvista plot)
             self.nx = np.shape(self.bz)[0]
             self.ny = np.shape(self.bz)[1]
@@ -92,10 +93,32 @@ class trace_fieldlines():
             if not os.path.exists('./fl_data/'):
                 os.mkdir('fl_data')
 
-            flh = FLH(self)    #Do field-line helicity things
+            if False:   #Option to plot based on the FLH density along
+                flh = FLH(self)    #Do field-line helicity things
+                self.flh_photo = flh.flh_photo #FLH density on the photosphere
+                self.plot_base = self.flh_photo
+            else:   #Option to plot based on the differences in FLH density
+                self.data_root = '../Data_15/'
+                data = netcdf_file('%s%04d.nc' % (self.data_root, self.snap), 'r', mmap=False)
+                self.bx = np.swapaxes(data.variables['bx'][:],0,2)
+                self.by = np.swapaxes(data.variables['by'][:],0,2)
+                self.bz = np.swapaxes(data.variables['bz'][:],0,2)
+                data.close()
 
-            self.flh_photo = flh.flh_photo #FLH density on the photosphere
+                flh1 = FLH(self)    #Do field-line helicity things
+                self.flh_photo1 = flh1.flh_photo #FLH density on the photosphere
 
+                self.data_root = '../Data_150/'
+                data = netcdf_file('%s%04d.nc' % (self.data_root, self.snap), 'r', mmap=False)
+                self.bx = np.swapaxes(data.variables['bx'][:],0,2)
+                self.by = np.swapaxes(data.variables['by'][:],0,2)
+                self.bz = np.swapaxes(data.variables['bz'][:],0,2)
+                data.close()
+
+                flh2 = FLH(self)    #Do field-line helicity things
+                self.flh_photo2 = flh2.flh_photo #FLH density on the photosphere
+
+                self.plot_base = self.flh_photo1 - self.flh_photo2 #FLH difference
             #self.flh_photo = np.ones((self.nx, self.ny))
             #Find start points
             self.set_starts()
@@ -118,7 +141,7 @@ class trace_fieldlines():
         x, y = np.meshgrid(self.xs, self.ys)
         z = 10*np.ones((np.shape(x)))
         surface = pv.StructuredGrid(x, y, z)
-        p = pv.Plotter(off_screen=True)
+        p = pv.Plotter(off_screen=False)
         p.background_color = "black"
 
         for li, line in enumerate(self.lines):
@@ -148,13 +171,15 @@ class trace_fieldlines():
             p.camera.focal_point = (0,0,4)
         if self.option > 1:
             z_photo = int((self.nz)*(10.0 - self.z0)/(self.z1 - self.z0))
-            p.add_mesh(surface, scalars= self.bz[:,:,z_photo], show_edges=False,cmap = 'plasma')
+            p.add_mesh(surface, scalars= self.plot_base, show_edges=False,cmap = 'plasma')
             p.camera.position = (400.0,200,250.0)
             p.camera.focal_point = (0,0,0)
 
 
-        p.show(screenshot='plots/b%04d.png' % self.save_number, window_size = (1000,1000))
-        print('Plot saved to file plots/b%04d.png' % self.save_number)
+        #p.show(screenshot='plots/b%04d.png' % self.save_number, window_size = (1000,1000))
+        #print('Plot saved to file plots/b%04d.png' % self.save_number)
+        p.show(screenshot='difftestb%04d.png' % self.save_number, window_size = (1000,1000))
+
 
     def set_starts(self):
         #Set the start positions for the lines to be traced. Will by default try to trace in both directions from this position.
@@ -203,8 +228,11 @@ class trace_fieldlines():
             #Plot up from the surface, based on some threshold of how strong the magnetic field is... Could be fun.
             z_photo = int((self.nz)*(10.0 - self.z0)/(self.z1 - self.z0))
 
-            surface_array = self.bz[:,:,z_photo]   #Distribution of surface magnetic field. This array is all that needs changing
-            surface_array = self.flh_photo   #Distribution of surface FLH
+
+            #surface_array = self.bz[:,:,z_photo]   #Distribution of surface magnetic field. This array is all that needs changing
+            surface_array = self.plot_base   #Distribution of surface FLH
+            #Want to plot the lines based on where the flh differences are highest
+
 
             max_surface = np.max(np.abs(surface_array)) + 1e-6
 
