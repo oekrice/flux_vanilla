@@ -28,7 +28,7 @@ PROGRAM fltrace
 
     !##########################################
     !DATA ROOT HERE. NEED TO READ IN AS STRING REALLY
-    data_root = '../Data_15/'
+    data_root = '../Data/'
 
     ! Put some of the major variables in here - things that can be changed occasionally but not in a series of runs
 
@@ -51,6 +51,12 @@ PROGRAM fltrace
     ds_factor =  flparameters(14)
     weakness_limit =  flparameters(15)
 
+    data_source = int(flparameters(16))
+
+    if (data_source > 0) then
+        if (data_source == 15) data_root = '../Data_15/'
+        if (data_source == 150) data_root = '../Data_150/'
+    end if
     call establish_grid()  !Establish the grid and read in the magnetic field
 
     call establish_starts()  !Import the location of the start points
