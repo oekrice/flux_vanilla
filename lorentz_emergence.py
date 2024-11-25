@@ -131,7 +131,6 @@ for di, data_source in enumerate(data_sources):
         toplot =  np.log(l2[:,:,h_index].T)
         if di == 0:
             vmins.append(np.min(toplot)); vmaxs.append(np.max(toplot))
-        print(vmins)
         im = axes[hi, di].pcolormesh(xs, ys, toplot, vmin = vmins[hi], vmax = vmaxs[hi])
         fig.colorbar(im, ax = axes[hi,di],label = 'Lorentz force (log)')
         axes[hi, di].set_title('%s, height = %.1f' % (data_titles[di], height))
@@ -139,7 +138,7 @@ for di, data_source in enumerate(data_sources):
 plt.suptitle('Lorentz Force Magnitude with Height, snap id = %d' % plot_id)
 plt.tight_layout()
 plt.savefig('lorentz/lorentz%03d.png' % plot_id)
-plt.show()
+plt.close()
 
 
 
