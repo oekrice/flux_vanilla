@@ -236,6 +236,7 @@ class trace_fieldlines():
         #p.show(screenshot='plots/b%04d.png' % self.save_number, window_size = (1000,1000))
         #print('Plot saved to file plots/b%04d.png' % self.save_number)
         p.show(screenshot='plots/b%04d.png' % self.save_number, window_size = (1000,1000))
+        p.close()
 
     def set_starts(self):
         #Set the start positions for the lines to be traced. Will by default try to trace in both directions from this position.

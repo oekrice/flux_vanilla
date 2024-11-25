@@ -39,7 +39,7 @@ if False:
 # read in file
 
 paths = ['./Data_15/', './Data_150/']
-titles = ['Strat ratio 15', 'Strat ratio 150']
+titles = ['Less Stratified', 'More Stratified']
 
 nstrats = 2
 
@@ -306,7 +306,7 @@ if True:
     for strat_flag in range(nstrats):
         im = axes[0,strat_flag].imshow(flhs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[0,strat_flag])
-        axes[0,strat_flag].set_title('FLH' + paths[strat_flag])
+        axes[0,strat_flag].set_title('FLH, ' + titles[strat_flag])
 
     diff = flhs[1].T - flhs[0].T
 
@@ -323,7 +323,7 @@ if True:
     for strat_flag in range(nstrats):
         im = axes[1,strat_flag].imshow(flws[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[1,strat_flag])
-        axes[1,strat_flag].set_title('FLW' + paths[strat_flag])
+        axes[1,strat_flag].set_title('FLW, ' + titles[strat_flag])
 
     diff = flws[1].T - flws[0].T
 
@@ -340,7 +340,7 @@ if True:
     for strat_flag in range(nstrats):
         im = axes[2,strat_flag].imshow(flhBzs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[2,strat_flag])
-        axes[2,strat_flag].set_title('WFLH' + paths[strat_flag])
+        axes[2,strat_flag].set_title('WFLH, ' + titles[strat_flag])
 
     diff = flhBzs[1].T - flhBzs[0].T
 
@@ -357,7 +357,7 @@ if True:
     for strat_flag in range(nstrats):
         im = axes[3,strat_flag].imshow(twistFs[strat_flag].T,origin='lower',cmap='seismic', vmin=vmin, vmax =vmax)
         fig.colorbar(im, ax=axes[3,strat_flag])
-        axes[3,strat_flag].set_title('Twists' + paths[strat_flag])
+        axes[3,strat_flag].set_title('Twists, ' + titles[strat_flag])
 
     diff = twistFs[1].T - twistFs[0].T
     im = axes[3,2].imshow(diff,origin='lower',cmap='seismic',vmin=-np.max(np.abs(diff)),vmax=np.max(np.abs(diff)) )
