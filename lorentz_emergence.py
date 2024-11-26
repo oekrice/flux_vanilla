@@ -124,20 +124,30 @@ for di, data_source in enumerate(data_sources):
     ly1 = jz1*bx1 - jx1*bz1
     lz1 = jx1*by1 - jy1*bx1
 
-    l2 = lx1**2 + ly1**2 + lz1**2
+    l2 = np.sqrt(lx1**2 + ly1**2 + lz1**2)
+
+    b2 = bx1**2 + by1**2 + bz1**2
+
+    delta = 1e-5
+    soft = b2 + delta*np.exp(-b2/delta)
+
 
     for hi, height in enumerate(plot_heights):
         h_index = int(nz*(height - zs[0])/(zs[-1] - zs[0]))
         toplot =  np.log(l2[:,:,h_index].T)
+
+        toplot = b2[:,:,h_index].T
+        toplot = soft[:,:,h_index].T
+        toplot = np.log(l2[:,:,h_index].T/soft[:,:,h_index].T)
         if di == 0:
             vmins.append(np.min(toplot)); vmaxs.append(np.max(toplot))
         im = axes[hi, di].pcolormesh(xs, ys, toplot, vmin = vmins[hi], vmax = vmaxs[hi])
-        fig.colorbar(im, ax = axes[hi,di],label = 'Lorentz force (log)')
+        fig.colorbar(im, ax = axes[hi,di],label = 'Normalised Lorentz force (log)')
         axes[hi, di].set_title('%s, height = %.1f' % (data_titles[di], height))
 
-plt.suptitle('Lorentz Force Magnitude with Height, snap id = %d' % plot_id)
+plt.suptitle('Normalised Lorentz Force with Height, snap id = %d' % plot_id)
 plt.tight_layout()
-plt.savefig('lorentz/lorentz%03d.png' % plot_id)
+plt.savefig('lorentz/lorentz_normalised%03d.png' % plot_id)
 plt.close()
 
 
