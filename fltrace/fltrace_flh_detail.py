@@ -311,10 +311,10 @@ class trace_fieldlines():
 
         self.lines = np.swapaxes(data.variables['lines'][:],0,2)
 
-
-if len(sys.argv) > 1:
-    snap_min = int(sys.argv[1])
-else:
-    snap_min = 0
-
-trace_fieldlines(snap_min = snap_min, snap_max = snap_min+1)
+nset = 10 #Number of concurrent runs. Receives input 0-(nset-1)
+set_num = int(sys.argv[1])
+snap_min = 200 + set_num
+while snap_min < 400:
+    print('Run number', snap_min)
+    trace_fieldlines(snap_min = snap_min, snap_max = snap_min+1)
+    snap_min = snap_min + nset
