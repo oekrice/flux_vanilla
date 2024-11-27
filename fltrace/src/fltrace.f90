@@ -201,9 +201,7 @@ PROGRAM fltrace
         call interpolate_bfield(pt(0), pt(1), pt(2))
         pt = pt + updown*ds*b1
         lcount = lcount + 1
-
     end do
-
 
     all_lines(line_number,:,:) = line
 

@@ -21,6 +21,8 @@ import sys
 
 class FLH():
     def __init__(self, grid):
+
+        high_resolution = True
         #Get grid and stuff in here so don't have to do it twice
         bxOg = grid.bx
         byOg = grid.by
@@ -60,7 +62,7 @@ class FLH():
         BUnit = flt.addDivergenceCleaningTerm(usf,grid_ncells,grid_spacing)   #Returns unit speed field.
         AWind = flt.getAFastSingle(BUnit,grid_ncells,grid_spacing)
 
-        curlField= flt.curl(bField,grid_spacing)
+        curlField = flt.curl(bField,grid_spacing)
 
         bzConst = np.sum(bz[:,:,0])/(dA*(grid.nx-1)*(grid.ny-1))
         AConst = flt.AConst(bzConst,points,dA,[grid.nx, grid.ny, grid.nz])
@@ -77,8 +79,12 @@ class FLH():
         lz = grid_spacing[2]*grid.nz
 
         #set number of points used to calculate the distribution from
-        nxl = grid.nx
-        nyl = grid.ny
+        if high_resolution:
+            nxl = 2*grid.nx
+            nyl = 2*grid.ny
+        else:
+            nxl = grid.nx
+            nyl = grid.ny
 
         # set a minimum strength of field line cut off
         bCut = 0.01
@@ -99,8 +105,10 @@ class FLH():
         yscale = domain_size/(grid.y1- grid.y0)
         zscale = domain_size/(grid.z1- grid.z0)
 
-        fieldLinesList,goodSeeds,seeds = flt.prepareCurves(bField,BxInterp,ByInterp,BzInterp,grid_spacing,[0+grid.dx*xscale,20-grid.dx*xscale],[0+grid.dy*yscale,20-grid.dy*yscale],z_photo,nxl,nyl,bCut)   #number ranges are the bounds to do the plotting (0-20)
-
+        if high_resolution:
+            fieldLinesList,goodSeeds,seeds = flt.prepareCurves(bField,BxInterp,ByInterp,BzInterp,grid_spacing,[0+grid.dx*xscale/2,20-grid.dx*xscale/2],[0+grid.dy*yscale/2,20-grid.dy*yscale/2],z_photo,nxl,nyl,bCut)   #number ranges are the bounds to do the plotting (0-20)
+        else:
+            fieldLinesList,goodSeeds,seeds = flt.prepareCurves(bField,BxInterp,ByInterp,BzInterp,grid_spacing,[0+grid.dx*xscale,20-grid.dx*xscale],[0+grid.dy*yscale,20-grid.dy*yscale],z_photo,nxl,nyl,bCut)   #number ranges are the bounds to do the plotting (0-20)
 
         flhInterp = flt.getInterpolatedQuantity(testFLHDen,grid_spacing)
         #flhBzInterp = flt.getInterpolatedQuantity(testFLHDen*bz[:,:,z_photo],grid_spacing)
