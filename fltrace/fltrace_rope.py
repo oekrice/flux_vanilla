@@ -285,9 +285,10 @@ class trace_fieldlines():
         xcl = 0.5*(self.xsl[1:] + self.xsl[:-1])
         zcl = 0.5*(self.zsl[1:] + self.zsl[:-1])
 
+
         cellcount = 0
-        for i in range(nxl):  #run through lower surface cells
-            for j in range(nzl):
+        for i in range(nxl-1):  #run through lower surface cells
+            for j in range(nzl-1):
                 prop = np.abs(surface_array[i,j])/max_surface
                 #if prop > 0.9:
                 if self.start_seeds[cellcount] < pb*prop**alpha:
