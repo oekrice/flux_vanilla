@@ -291,7 +291,7 @@ class trace_fieldlines():
                 prop = np.abs(surface_array[i,j])/max_surface
                 #if prop > 0.9:
                 if self.start_seeds[cellcount] < pb*prop**alpha:
-                    self.starts.append([xcl[i+1],0.0,zcl[j+1]])
+                    self.starts.append([xcl[i],0.0,zcl[j]])
                 cellcount += 1
 
         print('Tracing', len(self.starts), 'lines')
