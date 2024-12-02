@@ -103,12 +103,14 @@ class trace_fieldlines():
 
             self.plot_difference()
 
-            #os.system('rm ./fl_data/flines%03d.nc' % self.snap)
-            #os.system('rm ./fl_data/flparameters%03d.txt' % self.snap)
-            #os.system('rm ./fl_data/starts%03d.txt' % self.snap)
+            os.system('rm ./fl_data/flines%03d.nc' % self.snap)
+            os.system('rm ./fl_data/flparameters%03d.txt' % self.snap)
+            os.system('rm ./fl_data/starts%03d.txt' % self.snap)
             #os.system('rm ./fl_data/plot_base%d.npy' % self.snap)
             #os.system('rm ./fl_data/photo1%d.npy' % self.snap)
             #os.system('rm ./fl_data/photo2%d.npy' % self.snap)
+            os.system('rm ./fl_data/flines15_%03d.nc' % self.snap)
+            os.system('rm ./fl_data/flines150_%03d.nc' % self.snap)
 
 
 

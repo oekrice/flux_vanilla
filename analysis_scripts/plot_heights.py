@@ -225,6 +225,40 @@ if False:
     plt.savefig('Densities')
     plt.show()
 
+if True:
+    fig = plt.figure(figsize = (10,7))
+    energies = []
+    for source in range(2):
+        energies.append([])
+        hs = []
+        data_directory = directories[source]
+
+        fname = '%s%04d.nc' % (data_directory, plot)
+
+        try:
+            data = netcdf_file(fname, 'r', mmap=False)
+        except:
+            continue
+
+        en = np.swapaxes(data.variables['en'][:],0,2)
+        rho = np.swapaxes(data.variables['rho'][:],0,2)
+
+        pr = rho*en*(2/3)
+
+        for hi in range(height_min, height_max):
+            energies[source].append(np.sum(en[:,:,hi])*dx*dy)
+            hs.append(zc[hi])
+
+    energies = np.array(energies)
+    for source in range(2):
+        plt.plot(hs, energies[source,:], label = titles[source])
+    plt.yscale('log')
+    plt.legend()
+    plt.title('Energies with height')
+    plt.tight_layout()
+    plt.savefig('../energies/%04d.png' % plot)
+    plt.close()
+
 
 
 
