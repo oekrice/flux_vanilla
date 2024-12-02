@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import pyvista as pv
 from get_flh import FLH
 from scipy.ndimage import gaussian_filter1d
-#pv.start_xvfb()
+pv.start_xvfb()
 
 class trace_fieldlines():
     def __init__(self, snap_min, snap_max):
@@ -201,13 +201,49 @@ class trace_fieldlines():
 
         z_slice = gaussian_filter1d(z_slice, 2)
 
+        checkslice = z_slice[z_photo:]
+
+        def categorise(checkslice):
+            #Determine the topology based on this slice
+            #Initially will be negative followed by positive
+            #Check for rope
+            rope_index = -1
+            arcade = False
+            rope = False
+            rope_height = np.nan
+            arcade_height = np.nan
+            signs = np.sign(checkslice)
+            flips = np.where(signs[1:]*signs[:-1] == -1)[0]   #where the magnetic field changes sign
+
+            for i in range(len(flips)):
+                flip = flips[i]
+                if signs[flip] > 0.0:   #positive to negative
+                    rope_height = self.zc[z_photo:][flip]
+                    rope = True
+                else:
+                    rope_height = np.nan
+
+            #Check for arcade (before the rope forms and erupts)
+            for flip in flips:
+                if signs[flip] > 0.0 and np.min(checkslice[:flip]) < -by_reference_flux*0.25:
+                    arcade = True
+                    arcade_height = self.zc[z_photo:][flip]
+
+            return arcade, arcade_height, rope, rope_height
+
+        try:
+            arcade, aheight, rope, rheight = categorise(checkslice)
+        except:
+            arcade, aheight, rope, rheight = False, np.nan, False, np.nan
+
+        print('Rope height', rheight)
+
         rope_centre = 0.0
         for k in range(self.nz-1, 0, -1):
             if z_slice[k] > 0.0:
                 rope_centre = self.zs[k]
                 break
 
-        print(z_slice)
         print('R centre', rope_centre)
         centre_coordinates = [0.0, 0.0, rope_centre]
 

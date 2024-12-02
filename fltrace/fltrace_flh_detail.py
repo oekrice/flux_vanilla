@@ -148,12 +148,12 @@ class trace_fieldlines():
                 os.mkdir('plots')
             self.plot_difference()
 
-            os.system('rm ./fl_data/flines%03d.nc' % self.snap)
-            os.system('rm ./fl_data/flparameters%03d.txt' % self.snap)
-            os.system('rm ./fl_data/starts%03d.txt' % self.snap)
-            os.system('rm ./fl_data/plot_base%d.npy' % self.snap)
-            os.system('rm ./fl_data/photo1%d.npy' % self.snap)
-            os.system('rm ./fl_data/photo2%d.npy' % self.snap)
+            #os.system('rm ./fl_data/flines%03d.nc' % self.snap)
+            #os.system('rm ./fl_data/flparameters%03d.txt' % self.snap)
+            #os.system('rm ./fl_data/starts%03d.txt' % self.snap)
+            #os.system('rm ./fl_data/plot_base%d.npy' % self.snap)
+            #os.system('rm ./fl_data/photo1%d.npy' % self.snap)
+            #os.system('rm ./fl_data/photo2%d.npy' % self.snap)
 
 
 
@@ -198,7 +198,7 @@ class trace_fieldlines():
             p.camera.focal_point = (0,0,50)
             p.remove_scalar_bar()
 
-        p = pv.Plotter(off_screen=True, shape = (2,1))
+        p = pv.Plotter(off_screen=False, shape = (2,1))
         p.background_color = "black"
 
         p.subplot(0, 0)
@@ -293,7 +293,12 @@ class trace_fieldlines():
         np.savetxt('./fl_data/starts%03d.txt' % self.snap, self.starts)   #Coordinates of the start points of each field line (do this in python)
 
     def trace_lines_fortran(self):
-        if True:
+
+
+        if os.path.isfile('./fl_data/flines%d_%03d.nc' % (self.data_source, self.snap)):
+            data = netcdf_file('./fl_data/flines%d_%03d.nc' % (self.data_source, self.snap), 'r', mmap=False)
+            #Import existing field lines
+        else:
             os.system('make')
             if os.uname()[1] == 'brillouin.dur.ac.uk':
                 os.system('/usr/lib64/openmpi/bin/mpiexec -np 1 ./bin/fltrace %d' % self.snap)
@@ -301,19 +306,21 @@ class trace_fieldlines():
                 os.system('mpiexec -np 1 ./bin/fltrace %d' % self.snap)
             else:
                 os.system('mpirun -np 1 ./bin/fltrace %d' % self.snap)
+            os.system('scp -r ./fl_data/flines%03d.nc ./fl_data/flines%d_%03d.nc' % (self.snap, self.data_source, self.snap))
 
-        try:
-            data = netcdf_file('./fl_data/flines%03d.nc' % self.snap, 'r', mmap=False)
-            print('Field lines found')
+            data = netcdf_file('./fl_data/flines%d_%03d.nc' % (self.data_source, self.snap), 'r', mmap=False)
+            try:
+                data = netcdf_file('./fl_data/flines%03d.nc' % self.snap, 'r', mmap=False)
+                print('Field lines found')
 
-        except:
-            print('File not found')
+            except:
+                print('File not found')
 
         self.lines = np.swapaxes(data.variables['lines'][:],0,2)
 
-nset = 10 #Number of concurrent runs. Receives input 0-(nset-1)
+nset = 1000 #Number of concurrent runs. Receives input 0-(nset-1)
 set_num = int(sys.argv[1])
-snap_min = 200 + set_num
+snap_min = 0 + set_num
 while snap_min < 400:
     print('Run number', snap_min)
     trace_fieldlines(snap_min = snap_min, snap_max = snap_min+1)
