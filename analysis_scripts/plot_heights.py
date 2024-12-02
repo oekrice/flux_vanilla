@@ -256,7 +256,7 @@ if True:
     plt.legend()
     plt.title('Energies with height')
     plt.tight_layout()
-    plt.savefig('../energies/%04d.png' % plot)
+    plt.savefig('./energies/%04d.png' % plot)
     plt.close()
 
 
