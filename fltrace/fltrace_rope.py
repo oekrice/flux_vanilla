@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import pyvista as pv
 from get_flh import FLH
 from scipy.ndimage import gaussian_filter1d
-pv.start_xvfb()
+#pv.start_xvfb()
 
 class trace_fieldlines():
     def __init__(self, snap_min, snap_max):
