@@ -10,7 +10,7 @@ archie_flag = false
 MPIF90 ?= /usr/lib64/openmpi/bin/mpifort
 NETCDF = -I /usr/lib64/gfortran/modules
 NETCDFLIB = -L/usr/lib64/libnetcdff.so.7 -lnetcdff
-FFLAGS = -O3 -fcheck=all -Wuninitialized -march=native -fimplicit-none -Wall -Wextra -ffast-math -funroll-loops --param max-unroll-times=5
+FFLAGS = -O3 #-fcheck=all -Wuninitialized -march=native -fimplicit-none -Wall -Wextra -ffast-math -funroll-loops --param max-unroll-times=5
 
 else ifeq ($(shell hostname),login1.ham8.dur.ac.uk)
 archie_flag = false
@@ -97,7 +97,7 @@ visitclean:
 
 else
 
-$(info Compiling locally or on Hamilton)
+$(info Compiling Locally)
 
 all: main
 

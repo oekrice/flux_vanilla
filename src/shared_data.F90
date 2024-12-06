@@ -111,7 +111,7 @@ END TYPE Entry
   INTEGER, DIMENSION(3):: starts
 
   !Things to deal with reading in the parameters
-  INTEGER:: run_id
+  INTEGER:: run_id, machine_flag
 
 END MODULE shared_data
 

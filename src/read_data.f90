@@ -93,6 +93,9 @@ MODULE read_data
 
        ndiags = int(parameters(4))
        nsnaps = int(parameters(3))
+
+       machine_flag = int(parameters(16))
+
   END SUBROUTINE import_parameters
 
 

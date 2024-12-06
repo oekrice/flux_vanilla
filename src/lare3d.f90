@@ -40,8 +40,15 @@ PROGRAM lare3d
   CALL set_boundary_conditions !boundary.f90
   CALL boundary_conditions !boundary.f90
 
-  data_dir = '/home/grads/trcn27/rdata/flux_emergence/'
+  if (machine_flag < 0.5_num) then
+    data_dir = '/home/grads/trcn27/rdata/flux_emergence/'
+  else if (machine_flag  < 1.5_num) then
+    data_dir = '/nobackup/trcn27/flux_emergence/'
+  else
+    data_dir = './Data'
+  end if
 
+  if (rank == 0) print*, 'Data directory: ', data_dir
   WHERE(rho.LT.1.0e-9)rho=1.0e-9
 ! !
    IF (rank .EQ. 0) THEN
