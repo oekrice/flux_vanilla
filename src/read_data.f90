@@ -95,6 +95,7 @@ MODULE read_data
        nsnaps = int(parameters(3))
 
        machine_flag = int(parameters(16))
+       correction_factor = parameters(19)
 
   END SUBROUTINE import_parameters
 

@@ -81,7 +81,9 @@ eta = 1e-6
 
 nu0_decay = 0.0
 
-energy_factor = 1.75
+factors = [0.0, 0.01, 0.1, 0.2, 0.5, 1.0, 2.0]
+energy_factor = factors[run]
+
 zstar = 24.0/50.0
 chromosphere_temp = 1.0/150.0
 

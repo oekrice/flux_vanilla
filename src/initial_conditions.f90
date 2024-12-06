@@ -66,6 +66,8 @@ CONTAINS
 
     energy = energy/(gamma-1.0_num)
 
+    allocate(energy_reference(-1:nx+2,-1:ny+2,-1:nz+2))
+    energy_reference = energy
 !!$! Solve the hydrostatic equation to get rho
 !!$
 !!$    ! Get density at the base of the box

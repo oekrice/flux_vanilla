@@ -57,6 +57,9 @@ PROGRAM fltrace
         if (data_source == 15) data_root = '../Data_15/'
         if (data_source == 150) data_root = '../Data_150/'
     end if
+
+    data_root = '../Data000/'
+
     call establish_grid()  !Establish the grid and read in the magnetic field
 
     call establish_starts()  !Import the location of the start points

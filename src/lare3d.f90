@@ -83,6 +83,8 @@ PROGRAM lare3d
       CALL eulerian_remap(i) !remap.f90
       IF (rke) CALL energy_correction !diagnostics.f90
 
+      energy = energy +  correction_factor*dt*(energy_reference-energy)  !Energy correction factor for the Newton Cooling
+
 !      IF (any_open) THEN
 !         CALL open_bcs !openboundaries.f90
 !         CALL boundary_conditions !boundaries.f90
