@@ -34,7 +34,7 @@ SUBROUTINE save_snap(snap_num)
     !Exports the magnetic field at this plot_num to an appropriate netcdf file
     IMPLICIT NONE
 
-    CHARACTER(LEN =64):: output_filename
+    CHARACTER(LEN =64):: output_root, output_filename
     INTEGER:: snap_num, proc_write
     INTEGER:: ncid, vid
     INTEGER:: xs_id, ys_id, zs_id
@@ -43,17 +43,14 @@ SUBROUTINE save_snap(snap_num)
     INTEGER:: en_id, rho_id
     INTEGER:: vx_id, vy_id, vz_id
 
+    CHARACTER(LEN=4) :: snap_string
+    CHARACTER(LEN=3) :: run_string
 
-    print*, 'lbound flux', sum(abs(bz(1:nx,1:ny,0)))*dxb(1)*dyb(1)
-    if (snap_num < 10) then
-        write (output_filename, "(A7,A3,I1,A3)") "./Data/", "000", snap_num, ".nc"
-    else if (snap_num < 100) then
-        write (output_filename, "(A7,A2,I2,A3)") "./Data/", "00", snap_num, ".nc"
-    else if (snap_num < 1000) then
-        write (output_filename, "(A7,A1,I3,A3)")  "./Data/", "0", snap_num, ".nc"
-    else if (snap_num < 10000) then
-        write (output_filename, "(A7,I4,A3)")  "./Data/", snap_num, ".nc"
-    end if
+    write (snap_string,'(I4.4)') snap_num
+    write (run_string,'(I3.3)') run_id
+
+    output_root = trim(trim(data_dir)//trim(run_string)//'/')
+    output_filename = trim(trim(output_root)//trim(snap_string)//'.nc')
 
     if (rank == 0) then
     call try(nf90_create(trim(output_filename), nf90_clobber, ncid))

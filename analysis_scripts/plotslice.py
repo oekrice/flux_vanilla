@@ -14,7 +14,6 @@ import time
 import sys
 import matplotlib
 from scipy.io import netcdf_file
-from fltrace import trace_fieldlines
 
 #matplotlib.rcParams['text.usetex'] = True
 
@@ -82,9 +81,9 @@ if len(sys.argv) > 2:
     i = int(sys.argv[2])
 
 #for plot_num in range(0,nsnaps,1):
-for plot_num in range(100,401):
+for plot_num in range(274,275):
 
-    data_directory = './Data_150/'
+    data_directory = '../Data_15/'
 
     slice_index = ny//2
     i = plot_num
@@ -143,7 +142,7 @@ for plot_num in range(100,401):
     else:
         beta = 0.0*pr[1:-1,slice_index,1:-1].T
 
-    if True:
+    if False:
         trace_fieldlines(Grid(),bx,by,bz,save=plot_num, plot_vista = True, plot_notvista = False)
 
     if True:
@@ -202,7 +201,7 @@ for plot_num in range(100,401):
         print(beta[slice_index, slice_index])
         plt.tight_layout()
         #plt.show()
-        plt.savefig('plots/a%04d' % plot_num)
+        plt.savefig('../plots/a%04d' % plot_num)
         plt.close()
 
     if False:

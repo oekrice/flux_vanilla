@@ -4,7 +4,7 @@ MODULE setup
 
   PRIVATE :: initialise_arrays
   PUBLIC :: minimal_init,after_control, grid
-  PUBLIC :: open_files, close_files,restart_data
+  PUBLIC :: close_files
 
   REAL(num), DIMENSION(:), ALLOCATABLE :: dxnew, dynew, dznew
 
@@ -243,29 +243,6 @@ CONTAINS
   END SUBROUTINE stretch_z
 
 
-  SUBROUTINE open_files
-
-    CHARACTER(LEN=11+Data_Dir_Max_Length) :: file2
-    CHARACTER(LEN=7+Data_Dir_Max_Length) :: file3
-
-    IF (rank == 0) THEN
-       IF (.NOT. restart) THEN
-          WRITE(file2, '(a,"/lare3d.dat")') TRIM(data_dir)
-          OPEN(unit=20, STATUS='REPLACE',FILE=file2)
-          WRITE(file3, '(a,"/en.dat")') TRIM(data_dir)
-          OPEN(unit=30, STATUS = 'REPLACE', FORM='BINARY', FILE = file3)
-       ELSE
-          WRITE(file2, '(a,"/lare3d.dat")') TRIM(data_dir)
-          OPEN(unit=20, STATUS='OLD',POSITION='APPEND',FILE=file2)
-          WRITE(file3, '(a,"/en.dat")') TRIM(data_dir)
-          OPEN(unit=30, STATUS = 'OLD',POSITION='APPEND',FORM='BINARY', FILE = file3)
-       ENDIF
-    END IF
-
-  END SUBROUTINE open_files
-
-
-
   SUBROUTINE close_files
 
     IF (rank == 0) THEN
@@ -274,86 +251,6 @@ CONTAINS
     END IF
 
   END SUBROUTINE close_files
-
-
-
-  SUBROUTINE restart_data
-
-    CHARACTER(LEN=21+Data_Dir_Max_Length) :: filename
-    INTEGER :: filehandle, localcellcount, tn(3),sof
-    REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: data
-
-#ifdef NONMPIIO
-    print*, "Cannot restart from non-MPI io yet"
-    STOP
-#else
-
-    ! Create the filename for the last snapshot
-#ifdef MHDCLUSTER
-    WRITE(filename, '("nfs:",a,"/",i4.4,".llld")') TRIM(data_dir), restart_snapshot
-#else
-    WRITE(filename, '(a,"/",i4.4,".llld")') TRIM(data_dir), restart_snapshot
-#endif
-    ! Open the file
-    CALL MPI_FILE_OPEN(comm, TRIM(filename), MPI_MODE_RDONLY, &
-         MPI_INFO_NULL, filehandle, errcode)
-
-    CALL MPI_FILE_READ_ALL(filehandle,tn,3,MPI_INTEGER,status,errcode)
-    CALL MPI_FILE_READ_ALL(filehandle,sof,1,MPI_INTEGER,status,errcode)
-    CALL MPI_FILE_READ_ALL(filehandle,time,1,mpireal,status,errcode)
-
-    IF ((tn(1) /= nx_global).OR.(tn(2)/=ny_global).OR.(tn(3) /= nz_global)) THEN
-       IF (rank ==0) THEN
-          WRITE(20,*) 'Error: global dimensions do not match restart file.'
-       ENDIF
-       CALL MPI_FILE_CLOSE(filehandle, errcode)
-       CALL close_files
-       CALL MPI_FINALIZE(errcode)
-       STOP
-    ENDIF
-
-    IF (sof /= num) THEN
-       IF (rank == 0) THEN
-        WRITE(20,*) "Error precision of restart file doesn't match precision of code"
-       ENDIF
-       CALL MPI_FILE_CLOSE(filehandle,errcode)
-       CALL close_files
-       CALL MPI_FINALIZE(errcode)
-       STOP
-    ENDIF
-
-
-    ! Set my view of the file
-    CALL MPI_FILE_SET_VIEW(filehandle, initialdisp, mpireal, subtype,&
-         "native", MPI_INFO_NULL, errcode)
-
-    localcellcount = (nx+1) * (ny+1) * (nz+1)
-    ALLOCATE(data(0:nx,0:ny,0:nz))
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    rho(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    energy(0:nx,0:ny,0:nz) = data / (gamma - 1.0_num)
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    vx(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    vy(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    vz(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    bx(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    by(0:nx,0:ny,0:nz) = data
-    CALL MPI_FILE_READ_ALL(filehandle,data, localcellcount, mpireal, status, errcode)
-    bz(0:nx,0:ny,0:nz) = data
-
-    DEALLOCATE(data)
-
-#endif
-
-  CALL MPI_BARRIER(comm,errcode)
-
-  END SUBROUTINE restart_data
-
 
 
   ! This routine initialises arrays to sensible starting values

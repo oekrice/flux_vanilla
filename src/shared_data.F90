@@ -110,6 +110,9 @@ END TYPE Entry
   REAL(num):: shearfact, bfact
   INTEGER, DIMENSION(3):: starts
 
+  !Things to deal with reading in the parameters
+  INTEGER:: run_id
+
 END MODULE shared_data
 
 ! The pre-processor removes the following line so it compiles without error

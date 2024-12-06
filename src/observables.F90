@@ -3,7 +3,7 @@ MODULE observables
   IMPLICIT NONE
 
   PRIVATE
-  PUBLIC :: obs_store, obs_setup, obs_close
+  PUBLIC :: obs_setup, obs_close
 
   REAL(num), DIMENSION(:,:,:),ALLOCATABLE :: trace171, trace195, trace284, vxavg,vyavg,vzavg, rhosq
   REAL(num), DIMENSION(2) :: trace171_temp, trace195_temp, trace284_temp
@@ -159,138 +159,6 @@ CONTAINS
 
 
   END SUBROUTINE obs_setup
-
-
-
-
-  SUBROUTINE obs_store
-    REAL(num), SAVE :: next_snap_time = 0.0_num, previous_snap_time = 0.0_num
-    INTEGER, SAVE :: snapnum = 1
-    CHARACTER(LEN=17) :: filename
-    LOGICAL,SAVE :: firstcall=.TRUE.
-    INTEGER :: responce_number, localcellcount, filehandle
-    REAL(num) :: rho_sq_dt
-    LOGICAL, PARAMETER :: usempiwrite = .FALSE.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    !
-    ! This subroutine won't restart properly
-
-    IF (firstcall) THEN
-       next_snap_time = cadence
-       firstcall = .FALSE.
-    ENDIF
-
-    ! store the relevent n^2 values
-    DO iz = 1, nz
-       DO iy = 1, ny
-          DO ix = 1, nx
-             responce_number = NINT((LOG10(energy(ix,iy,iz)) - temp_min) / temp_max * 81.0_num)
-             IF (responce_number > 81) responce_number = 81
-             IF (responce_number < 1) responce_number = 1
-             rho_sq_dt = rho(ix,iy,iz)**2 * dt
-             trace171(ix,iy,iz) = trace171(ix,iy,iz) + rho_sq_dt * responce_171(responce_number)
-             trace195(ix,iy,iz) = trace195(ix,iy,iz) + rho_sq_dt * responce_195(responce_number)
-             trace284(ix,iy,iz) = trace284(ix,iy,iz) + rho_sq_dt * responce_284(responce_number)
-             vxavg(ix,iy,iz) = vxavg(ix,iy,iz) + vx(ix,iy,iz) * rho_sq_dt
-             vyavg(ix,iy,iz) = vyavg(ix,iy,iz) + vy(ix,iy,iz) * rho_sq_dt
-             vzavg(ix,iy,iz) = vzavg(ix,iy,iz) + vz(ix,iy,iz) * rho_sq_dt
-             rhosq(ix,iy,iz) = rhosq(ix,iy,iz) + rho_sq_dt
-          END DO
-       END DO
-    END DO
-
-
-    IF (time >= next_snap_time) THEN
-
-       w1 = time - previous_snap_time
-       trace171 = trace171 / w1
-       trace195 = trace195 / w1
-       trace284 = trace284 / w1
-       vxavg = vxavg / rhosq
-       vyavg = vyavg / rhosq
-       vzavg = vzavg / rhosq
-       rhosq = rhosq / w1
-
-       IF (rank ==0) THEN
-          WRITE(60,*) 'Time: ', time, 'Snapnum:',snapnum
-       ENDIF
-
-       ! Write out the data.
-#ifndef NONMPIIO
-       ! Create the filename
-       WRITE(filename, '(a,"/",i4.4,".l3d_obs")') data_dir, snapnum
-
-       ! Rank 0 deletes the file as there is no replace option on the file open,
-       ! not deleting causes literal overwriting and potential confusion.
-       IF (rank == 0) CALL MPI_FILE_DELETE(filename, MPI_INFO_NULL, errcode)
-
-       ! Wait for the deletetion before we open the file...
-       CALL MPI_BARRIER(comm,errcode)
-
-       ! Open the file, filehandle is the MPI file unit number.
-       CALL MPI_FILE_OPEN(comm, filename, MPI_MODE_CREATE + MPI_MODE_WRONLY, &
-            MPI_INFO_NULL, filehandle, errcode)
-
-       ! If rank 0 then write the file header.
-       IF (rank == 0) THEN
-          CALL MPI_FILE_WRITE(filehandle,(/nx_global, ny_global, nz_global /), 3, MPI_INTEGER, &
-               status, errcode)
-          CALL MPI_FILE_WRITE(filehandle,KIND(1.0_num),1,MPI_INTEGER,status,errcode)
-          CALL MPI_FILE_WRITE(filehandle,time,1,mpireal,status,errcode)
-          CALL MPI_FILE_WRITE(filehandle,xb_global(1:nx_global),nx_global,mpireal,status,errcode)
-          CALL MPI_FILE_WRITE(filehandle,yb_global(1:ny_global),ny_global,mpireal,status,errcode)
-          CALL MPI_FILE_WRITE(filehandle,zb_global(1:nz_global),nz_global,mpireal,status,errcode)
-       ENDIF
-
-       ! Set my view of the file
-       CALL MPI_FILE_SET_VIEW(filehandle, initialdisp, mpireal, obstype,&
-            "native", MPI_INFO_NULL, errcode)
-
-       localcellcount = nx * ny * nz
-
-       CALL MPI_FILE_WRITE_ALL(filehandle,trace171, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,trace195, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,trace284, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,vxavg, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,vyavg, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,vzavg, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_WRITE_ALL(filehandle,rhosq, localcellcount, mpireal, status, errcode)
-       CALL MPI_FILE_CLOSE(filehandle, errcode)
-#else
-       WRITE(filename, '(a,"/",i3.3,i4.4,".obs")') data_dir, rank, snapnum
-       OPEN(unit=61,FORM='UNFORMATTED',STATUS='REPLACE',FILE=filename)
-       WRITE(61) REAL(nx_global,num)-0.1_num,REAL(ny_global,num)-0.1_num, &
-            REAL(nz_global,num)-0.1_num
-       WRITE(61)  REAL(nx,num)-0.1_num,REAL(ny,num)-0.1_num, REAL(nz,num)-0.1_num
-       WRITE(61) time
-       WRITE(61) trace171(1:nx,1:ny,1:nz)
-       WRITE(61) trace195(1:nx,1:ny,1:nz)
-       WRITE(61) trace284(1:nx,1:ny,1:nz)
-       WRITE(61) vxavg(1:nx,1:ny,1:nz)
-       WRITE(61) vyavg(1:nx,1:ny,1:nz)
-       WRITE(61) vzavg(1:nx,1:ny,1:nz)
-       WRITE(61) rhosq(1:nx,1:ny,1:nz)
-       WRITE(61) xc(1:nx),yc(1:ny),zc(1:nz)
-       CLOSE(61)
-#endif
-
-       ! Prepare for the next snapshot
-       snapnum = snapnum + 1
-       next_snap_time = next_snap_time + cadence
-       previous_snap_time = time
-       trace171 = 0.0_num
-       trace195 = 0.0_num
-       trace284 = 0.0_num
-       vxavg = 0.0_num
-       vyavg = 0.0_num
-       vzavg = 0.0_num
-
-
-    ENDIF
-
-  END SUBROUTINE obs_store
-
 
 
   SUBROUTINE obs_close
