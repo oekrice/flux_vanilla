@@ -41,7 +41,7 @@ if machine_flag == 0:
 if machine_flag == 1:
     data_directory = '/nobackup/trcn27/flux_emergence/%03d/' % run
 if machine_flag == 2:
-    data_directory = '.Data%03d/' % run
+    data_directory = ('./Data%03d/' % run)
 
 if os.path.isdir(data_directory):
     for i in range(1000):
@@ -59,9 +59,9 @@ if not os.path.isdir('./parameters'):
 if not os.path.isdir('./diagnostics'):
     os.mkdir('./diagnostics')
 
-nx = 64
-ny = 64
-nz = 64
+nx = 96
+ny = 96
+nz = 96
 
 x0 = -130.; x1 = 130.0
 y0 = -130.; y1 = 130.0
