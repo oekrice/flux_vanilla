@@ -187,10 +187,14 @@ class trace_fieldlines():
             self.trace_lines_fortran()
 
             for li, line in enumerate(self.lines):
-                line = np.array(line)
-                line_length = len(line[line[:,2]<1e6])
+                for k in range(len(line)):
+                    if line[k,2] < 1e6 and line[k,2] >= 10.0:
+                        line_length += 1
+                    else:
+                        break
+                line = line[:line_length,:]
                 #Thin out the lines (if required)
-                if line_length > 0:
+                if line_length > 1:
                     thin_fact = max(int(line_length/self.line_plot_length), 1)
                     thinned_line = line[:line_length:thin_fact].copy()
                     thinned_line[-1] = line[line_length-1].copy()
