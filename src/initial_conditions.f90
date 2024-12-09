@@ -17,9 +17,9 @@ CONTAINS
   !-----------------------------------------------------------------------------
 
   SUBROUTINE Equilibrium
-    INTEGER :: ix, iy, iz
+    INTEGER :: ix, iy, iz, i, j
     REAL(num) :: photo, trans, cor, base, dg, a, b0, alpha, bphi, btheta, RC, r, pext, pb, Rmin, R0, rho_ph, delta, x0, z0, lam, b1, r2, p, d1, d2, b00, w00, pi, backfield_strength
-
+    REAL(num):: xrange, yrange, mask_factor
 ! Set velocities and magnetic fields to zero
 
     vx = 0.0_num
@@ -67,6 +67,19 @@ CONTAINS
     energy = energy/(gamma-1.0_num)
 
     allocate(energy_reference(-1:nx+2,-1:ny+2,-1:nz+2))
+    allocate(gauss_mask(-1:nx+2,-1:ny+2, -1:nz+2))
+
+    !Things for smoothing out the energy function
+    xrange = 0.5_num*(x_end - x_start)
+    yrange = 0.5_num*(y_end - y_start)
+
+    mask_factor = 0.25_num
+    do i = -1, nx+2
+      do j = -1, ny+2
+        gauss_mask(i,j,:) = exp(-(xc(i)/(mask_factor*xrange))**2 - (yc(i)/(mask_factor*yrange))**2)
+      end do
+    end do
+
     energy_reference = energy
 !!$! Solve the hydrostatic equation to get rho
 !!$

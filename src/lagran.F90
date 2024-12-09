@@ -16,7 +16,7 @@ MODULE lagran
 
   PRIVATE
 
-  PUBLIC :: lagrangian_step, eta_calc
+  PUBLIC :: lagrangian_step, eta_calc, energy_rebound
 
   ! only used inside lagran.f90
   REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: bx1, by1, bz1, qxy, qxz, qyz, pressure
@@ -915,6 +915,19 @@ END SUBROUTINE viscosity_and_b_update
     END IF
 
   END SUBROUTINE store_boundary_dv
+
+  SUBROUTINE energy_rebound
+
+  IMPLICIT NONE
+
+  if (.true.) then !Un-Gaussed correction factor
+  energy = energy +  correction_factor*dt*(energy_reference-energy)  !Energy correction factor for the Newton Cooling
+  else  !Gaussed correction factor
+  energy = energy +  gauss_mask*correction_factor*dt*(energy_reference-energy)  !Energy correction factor for the Newton Cooling
+  end if
+
+
+  END SUBROUTINE energy_rebound
 
 END MODULE lagran
 

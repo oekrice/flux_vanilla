@@ -114,6 +114,7 @@ END TYPE Entry
   INTEGER:: run_id, machine_flag
   REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: energy_reference
   REAL(num):: correction_factor
+  REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: gauss_mask
 
 END MODULE shared_data
 
