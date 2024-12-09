@@ -920,7 +920,7 @@ END SUBROUTINE viscosity_and_b_update
 
   IMPLICIT NONE
 
-  if (.true.) then !Un-Gaussed correction factor
+  if (.false.) then !Un-Gaussed correction factor
   energy = energy +  correction_factor*dt*(energy_reference-energy)  !Energy correction factor for the Newton Cooling
   else  !Gaussed correction factor
   energy = energy +  gauss_mask*correction_factor*dt*(energy_reference-energy)  !Energy correction factor for the Newton Cooling
