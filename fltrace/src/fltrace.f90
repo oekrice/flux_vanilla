@@ -10,7 +10,7 @@ PROGRAM fltrace
 
     CHARACTER(LEN=64):: input_value
     CHARACTER(LEN=64):: parameter_filename
-    CHARACTER(LEN=4):: snap_id
+    CHARACTER(LEN=4):: snap_id, run_id
 
 
     call get_command_argument(1, input_value)
