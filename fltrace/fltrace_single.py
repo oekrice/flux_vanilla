@@ -51,7 +51,7 @@ class trace_fieldlines():
 
         #Establish grid parameters (can be read in from elsewhere of course)
         for snap_number in range(snap_min, snap_max):
-            self.run = snap_number
+            self.run = run
             self.snap = snap_number
             self.print_flag = 1
 

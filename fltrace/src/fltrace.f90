@@ -10,14 +10,14 @@ PROGRAM fltrace
 
     CHARACTER(LEN=64):: input_value
     CHARACTER(LEN=64):: parameter_filename
-    CHARACTER(LEN=4):: run_id
+    CHARACTER(LEN=4):: snap_id
 
 
     call get_command_argument(1, input_value)
-    read(unit=input_value,fmt=*) run
+    read(unit=input_value,fmt=*) snap
 
-    write (run_id,'(I3.3)') run
-    parameter_filename = trim('./fl_data/flparameters'//trim(run_id)//'.txt')
+    write (snap_id,'(I3.3)') snap
+    parameter_filename = trim('./fl_data/flparameters'//trim(snap_id)//'.txt')
 
     print*, parameter_filename
     !Import parameters from text file (saved out by python in the fltrace directory)
@@ -28,7 +28,7 @@ PROGRAM fltrace
 
     !##########################################
     !DATA ROOT HERE. NEED TO READ IN AS STRING REALLY
-    data_root = '../Data/'
+    data_root = '../Data'
 
     ! Put some of the major variables in here - things that can be changed occasionally but not in a series of runs
 
@@ -58,7 +58,10 @@ PROGRAM fltrace
         if (data_source == 150) data_root = '../Data_150/'
     end if
 
-    data_root = '../Data000/'
+    write (run_id,'(I3.3)') run
+    data_root = trim(trim(data_root)//trim(run_id)//'/')
+
+    !data_root = '../Data000/'
 
     call establish_grid()  !Establish the grid and read in the magnetic field
 
@@ -80,15 +83,14 @@ PROGRAM fltrace
     INTEGER:: i
     REAL(num), DIMENSION(:):: starts_import(0:nstarts*3-1)
     CHARACTER(LEN=64):: starts_filename
-    CHARACTER(LEN=4):: run_id
+    CHARACTER(LEN=4):: run_id, snap_id
 
 
     ALLOCATE(starts(0:nstarts-1,0:2))
 
-    write (run_id,'(I3.3)') run
+    write (snap_id,'(I3.3)') snap
 
-    print*, run, run_id
-    starts_filename = trim('./fl_data/starts'//trim(run_id)//'.txt')
+    starts_filename = trim('./fl_data/starts'//trim(snap_id)//'.txt')
 
     open(1,file= starts_filename)
     read(1, *) starts_import

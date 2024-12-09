@@ -25,7 +25,7 @@ MODULE grid
         write (snap_id,'(I4.4)') snap
         bfield_filename = trim(trim(data_root)//trim(snap_id)//'.nc')
 
-        if (print_flag > 0.5) print*, 'Using magnetic field from file', bfield_filename
+        if (print_flag > 0.5) print*, 'Using magnetic field from file ', bfield_filename
 
         call try(nf90_open(trim(bfield_filename), nf90_nowrite, ncid))
 
@@ -101,11 +101,11 @@ MODULE grid
 
     character(len=64):: filename
     integer:: aid, bid, cid, vid, ncid
-    CHARACTER(LEN=4):: run_id
+    CHARACTER(LEN=4):: snap_id
 
-    write (run_id,'(I3.3)') run
+    write (snap_id,'(I3.3)') snap
 
-    filename = trim('./fl_data/flines'//trim(run_id)//'.nc')
+    filename = trim('./fl_data/flines'//trim(snap_id)//'.nc')
 
     call try(nf90_create(trim(filename), nf90_clobber, ncid))
 
