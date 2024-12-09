@@ -333,4 +333,4 @@ if len(sys.argv) > 2:
 else:
     snap_min = 0
 
-trace_fieldlines(run = 0, snap_min = snap_min, snap_max = snap_min+1)
+trace_fieldlines(run = run, snap_min = snap_min, snap_max = snap_min+1)

@@ -83,7 +83,7 @@ PROGRAM fltrace
     INTEGER:: i
     REAL(num), DIMENSION(:):: starts_import(0:nstarts*3-1)
     CHARACTER(LEN=64):: starts_filename
-    CHARACTER(LEN=4):: run_id, snap_id
+    CHARACTER(LEN=4):: snap_id
 
 
     ALLOCATE(starts(0:nstarts-1,0:2))
