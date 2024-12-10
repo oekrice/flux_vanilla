@@ -47,9 +47,7 @@ CONTAINS
     DO ix = -1, nx+1
        DO iy = -1, ny+1
           DO iz = -1, nz+1
-             
              ! Energy profile
-
              IF (zc(iz) .LE. photo) THEN
                 energy(ix,iy,iz) = 1.0_num - delta*zc(iz)*(gamma-1.0_num)/gamma 
              ELSEIF (zc(iz) .LE. trans) THEN
