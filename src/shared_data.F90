@@ -113,7 +113,7 @@ END TYPE Entry
   !Things to deal with reading in the parameters
   INTEGER:: run_id, machine_flag
   REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: energy_reference
-  REAL(num):: correction_factor
+  REAL(num):: correction_factor, stratification_factor
   REAL(num), DIMENSION(:,:,:), ALLOCATABLE :: gauss_mask
 
 END MODULE shared_data

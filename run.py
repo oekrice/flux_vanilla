@@ -59,9 +59,9 @@ if not os.path.isdir('./parameters'):
 if not os.path.isdir('./diagnostics'):
     os.mkdir('./diagnostics')
 
-nx = 96
-ny = 96
-nz = 96
+nx = 64
+ny = 64
+nz = 64
 
 x0 = -130.; x1 = 130.0
 y0 = -130.; y1 = 130.0
@@ -75,17 +75,18 @@ energy_init = 1.5e-2
 
 nplots = 250
 ndiags = 000
-tmax = 250.0
+tmax = 1.0
 
 eta = 1e-6
 
 nu0_decay = 0.0
 
-factors = [0.0, 0.01, 0.1, 0.2, 0.5, 1.0, 2.0]
-energy_factor = factors[run]
+#factors = [0.0, 0.01, 0.1, 0.2, 0.5, 1.0, 2.0]
+#energy_factor = factors[run]
+energy_factor = 0.0#1e-3
 
 zstar = 24.0/50.0
-chromosphere_temp = 1.0/150.0
+stratification_factor = 1.0
 
 variables = np.zeros((30))
 
@@ -107,10 +108,9 @@ variables[14] = ny
 variables[15] = nz
 variables[16] = machine_flag
 variables[17] = density_init
-variables[18] = energy_init
+variables[18] = stratification_factor
 variables[19] = energy_factor
 variables[20] = zstar
-variables[21] = chromosphere_temp
 
 if True:
     class Grid():

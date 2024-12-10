@@ -85,6 +85,7 @@ PROGRAM lare3d
 
       CALL energy_rebound  !lagran.f90
 
+      if (rank == 0) print*, maxval(abs(vz))
 !      IF (any_open) THEN
 !         CALL open_bcs !openboundaries.f90
 !         CALL boundary_conditions !boundaries.f90

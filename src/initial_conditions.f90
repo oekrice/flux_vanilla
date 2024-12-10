@@ -27,7 +27,7 @@ CONTAINS
     vz = 0.0_num
 
 
-    grav = 1.0_num
+    grav = 0.8_num
 
 ! Parameters
 
@@ -44,18 +44,18 @@ CONTAINS
     
     pi = 3.14159265_num
 
-    DO ix = -1, nx+1
-       DO iy = -1, ny+1
-          DO iz = -1, nz+1
+    DO ix = -1, nx+2
+       DO iy = -1, ny+2
+          DO iz = -1, nz+2
              ! Energy profile
              IF (zc(iz) .LE. photo) THEN
                 energy(ix,iy,iz) = 1.0_num - delta*zc(iz)*(gamma-1.0_num)/gamma 
              ELSEIF (zc(iz) .LE. trans) THEN
                 energy(ix,iy,iz) = 1.0_num
              ELSEIF (zc(iz) .LE. cor) THEN
-                energy(ix,iy,iz) = (150.0_num)**((zc(iz)-trans)/(cor-trans))
+                energy(ix,iy,iz) = (stratification_factor)**((zc(iz)-trans)/(cor-trans))
              ELSE
-                energy(ix,iy,iz) = 150.0_num
+                energy(ix,iy,iz) = stratification_factor
              ENDIF
 
           ENDDO
@@ -107,6 +107,10 @@ CONTAINS
       CALL MPI_SEND(rho(:,:,nz-1),(nx+4)*(ny+4),mpireal,back,tag,comm,errcode)
       CALL MPI_SEND(energy(:,:,nz-1),(nx+4)*(ny+4),mpireal,back,tag,comm,errcode)
     ENDIF
+
+  if (rank == 0) print*, 'Initial conditions'
+  if (rank == 0) print*, 'Density Range', minval(rho), maxval(rho)
+  if (rank == 0) print*, 'Energy Range', minval(energy), maxval(energy)
 
   !Add flux rope
   x0 = 0.0_num       ! Tube positions

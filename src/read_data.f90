@@ -97,6 +97,8 @@ MODULE read_data
        machine_flag = int(parameters(16))
        correction_factor = parameters(19)
 
+      stratification_factor = parameters(18)
+
   END SUBROUTINE import_parameters
 
 

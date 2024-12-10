@@ -137,7 +137,7 @@ class trace_fieldlines():
         x, y = np.meshgrid(self.xs, self.ys)
         z = 10*np.ones((np.shape(x)))
         surface = pv.StructuredGrid(x, y, z)
-        p = pv.Plotter(off_screen=False)
+        p = pv.Plotter(off_screen=True)
         p.background_color = "black"
 
         for li, line in enumerate(self.lines):
@@ -173,8 +173,8 @@ class trace_fieldlines():
             p.camera.focal_point = (0,0,0)
 
 
-        p.show(screenshot='../plots/b%04d.png' % self.save_number, window_size = (1000,1000))
-        #print('Plot saved to file plots/b%04d.png' % self.save_number)
+        p.show(screenshot='./plots/b%04d.png' % self.save_number, window_size = (1000,1000))
+        print('Plot saved to file ./plots/b%04d.png' % self.save_number)
         #p.show(screenshot='difftestb%04d.png' % self.save_number, window_size = (1000,1000))
 
     def plot_difference(self):
@@ -333,4 +333,12 @@ if len(sys.argv) > 2:
 else:
     snap_min = 0
 
-trace_fieldlines(run = run, snap_min = snap_min, snap_max = snap_min+1)
+nset = 10 #Number of concurrent runs. Receives input 0-(nset-1)
+set_num = int(sys.argv[2])
+snap_min = 0 + set_num
+while snap_min < 250:
+    print('Plot number', snap_min)
+    trace_fieldlines(run = run, snap_min = snap_min, snap_max = snap_min+1)
+    snap_min = snap_min + nset
+
+#trace_fieldlines(run = run, snap_min = snap_min, snap_max = snap_min+1)
